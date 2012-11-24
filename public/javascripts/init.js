@@ -18,5 +18,7 @@
   global.canvas_height = 600
 
   player = require('./player')
-  player.draw()
+
+  start = require('./game')
+  start()
 })()

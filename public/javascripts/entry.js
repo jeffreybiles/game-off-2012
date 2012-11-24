@@ -1,3 +1,4 @@
 window.onload = function(){
-   require('./init')
+  require('./animationFrame')
+  require('./init')
 }

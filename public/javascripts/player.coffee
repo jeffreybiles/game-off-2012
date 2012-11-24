@@ -9,13 +9,9 @@ player.width = 50
 player.color = 'black'
 
 player.draw = ->
-  log("draw draw draw")
-  log("I'm drawing: #{@color}")
-  ctx.fillColor = @color
+  ctx.fillStyle = 'black'
   console.log(@x, @y, @width, @height)
   ctx.fillRect(@x,@y,@width,@height)
-
-console.log('hello there')
 
 module.exports = player
 
