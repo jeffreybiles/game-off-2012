@@ -1,14 +1,18 @@
 {
-  "name": "application-name",
+  "name": "gameoff",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "scripts": {
-    "start": "node app"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "3.0.1",
     "jade": "*",
     "stylus": "*",
     "coffee-script": "~1.4.0"
+  },
+  "subdomain": "jeffreybiles.gameoff",
+  "engines": {
+    "node": "0.8.x"
   }
 }
