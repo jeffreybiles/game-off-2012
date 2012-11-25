@@ -3,7 +3,7 @@ player = object(entity)
 
 player.x = canvas.width/2
 player.y = canvas.height/2
-player.hp = 100
+player.hp = 50
 player.type = 'player'
 
 player.draw = ->

@@ -11,6 +11,6 @@ sword.timer = 10 #all this crap about numbers is only until we get animation
 
 sword.hit = (hit) ->
   hit.hp -= 20
-  game.latestEnemy = hit
+  game.latestEnemy = if hit.hp >= 0 then hit else null
 
 module.exports = sword
