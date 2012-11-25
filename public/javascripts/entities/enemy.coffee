@@ -1,4 +1,4 @@
-enemy = object(player)
+enemy = object(playerPrototype)
 enemy.type = 'enemy'
 
 enemy.hit = (hitter) ->
@@ -8,6 +8,7 @@ enemy.hit = (hitter) ->
 enemy.hurt = (hitter) ->
   hitter.hp -= 10
   log(hitter.hp)
+
 enemy.randomizePosition = ->
   @x = Math.random()*canvas.width
   @y = Math.random()*canvas.height

@@ -17,6 +17,7 @@ drawBackground = ->
   ctx.fillRect(0,0,canvas.width,canvas.height)
   ctx.fillStyle = 'red'
   ctx.fillRect(10, 10, player.hp + 10, 10)
+  ctx.fillRect(canvas.width - 150, 10, latestEnemy[0].hp, 10) if latestEnemy[0]
 
 enemyFactory = (num) ->
   for n in [1..num]
@@ -25,7 +26,8 @@ enemyFactory = (num) ->
     enemies.push(newEnemy)
 
 start = ->
-  enemyFactory(1)
+  enemyFactory(2)
+  latestEnemy[0] = enemies[0]
   mainLoop()
 
 module.exports = start

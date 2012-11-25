@@ -448,23 +448,32 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
 
-  player = require('./entities/player')
-  enemies = []
-  enemyPrototype = require('./entities/enemy')
+  enemy = object(playerPrototype);
 
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
+  enemy.type = 'enemy';
 
-  start = require('./game')
-  start()
-})()
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    hitter.hp -= 10;
+    return log(hitter.hp);
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
 });
 
 require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -506,35 +515,26 @@ require.define("/entities/entity.coffee",function(require,module,exports,__dirna
     return this.dy += (this.y - collider.y) * this.bounciness;
   };
 
+  entity.checkCollisions = function(colliders) {
+    var collider, _i, _len, _ref, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
+      collider = colliders[_i];
+      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
+        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
+          this.hit(collider);
+          _results.push(collider.hit(this));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   module.exports = entity;
-
-}).call(this);
-
-});
-
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(player);
-
-  enemy.type = 'enemy';
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    hitter.hp -= 10;
-    return log(hitter.hp);
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  module.exports = enemy;
 
 }).call(this);
 
@@ -558,10 +558,10 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   player.draw = function() {
     ctx.fillStyle = 'black';
     ctx.fillRect(this.x, this.y, this.width, this.height);
-    if (this.slashing > 0) {
+    if (this.sword && this.sword.timer > 0) {
       ctx.fillStyle = 'red';
-      ctx.fillRect(this.slashx, this.slashy, this.width, this.height);
-      return this.slashing -= 1;
+      ctx.fillRect(this.sword.x, this.sword.y, this.sword.width, this.sword.height);
+      return this.sword.timer -= 1;
     }
   };
 
@@ -589,32 +589,66 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
     return log(this.x, this.y);
   };
 
-  player.checkCollisions = function(colliders) {
-    var collider, _i, _len, _ref, _ref1, _results;
-    _results = [];
-    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
-      collider = colliders[_i];
-      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
-        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
-          this.hit(collider);
-          _results.push(collider.hit(this));
-        } else {
-          _results.push(void 0);
-        }
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
   player.slash = function() {
-    this.slashx = this.x + Math.cos(this.direction) * this.width;
-    this.slashy = this.y - Math.sin(this.direction) * this.height;
-    return this.slashing = 10;
+    var sword;
+    sword = object(swordPrototype);
+    sword.place(this.x, this.y, this.width, this.height, this.direction);
+    sword.checkCollisions(enemies);
+    return this.sword = sword;
   };
 
   module.exports = player;
+
+}).call(this);
+
+});
+
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
+
+  playerPrototype = require('./entities/player')
+  enemyPrototype = require('./entities/enemy')
+  swordPrototype = require('./entities/sword')
+  player = object(playerPrototype)
+  enemies = []
+  latestEnemy = []
+
+  Mousetrap.bind('space', function(){player.slash()})
+  Mousetrap.hold('up', player, 'kup')
+  Mousetrap.hold('down', player, 'kdown')
+  Mousetrap.hold('left', player, 'kleft')
+  Mousetrap.hold('right', player, 'kright')
+
+  start = require('./game')
+  start()
+})()
+});
+
+require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, sword;
+
+  entity = require('./entity');
+
+  sword = object(entity);
+
+  sword.place = function(x, y, width, height, direction) {
+    sword.x = x + Math.cos(direction) * width;
+    sword.y = y - Math.sin(direction) * height;
+    sword.width = width;
+    return sword.height = height;
+  };
+
+  sword.timer = 10;
+
+  sword.hit = function(hit) {
+    hit.hp -= 20;
+    log(hit.hp);
+    latestEnemy[0] = hit;
+    return log(latestEnemy);
+  };
+
+  module.exports = sword;
 
 }).call(this);
 
@@ -648,7 +682,10 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     ctx.fillStyle = "rgb(" + color + "," + color + "," + color + ")";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'red';
-    return ctx.fillRect(10, 10, player.hp + 10, 10);
+    ctx.fillRect(10, 10, player.hp + 10, 10);
+    if (latestEnemy[0]) {
+      return ctx.fillRect(canvas.width - 150, 10, latestEnemy[0].hp, 10);
+    }
   };
 
   enemyFactory = function(num) {
@@ -663,7 +700,8 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   start = function() {
-    enemyFactory(1);
+    enemyFactory(2);
+    latestEnemy[0] = enemies[0];
     return mainLoop();
   };
 

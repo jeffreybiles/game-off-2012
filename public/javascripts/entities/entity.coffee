@@ -22,5 +22,11 @@ entity.knockback = (collider) ->
   @dx += (@x - collider.x)*@bounciness
   @dy += (@y - collider.y)*@bounciness
 
+entity.checkCollisions = (colliders) ->
+  for collider in colliders
+    if @x + @width > collider.x > @x - collider.width
+      if @y + @height > collider.y > @y - collider.height
+        @hit(collider)
+        collider.hit(@)
 
 module.exports = entity

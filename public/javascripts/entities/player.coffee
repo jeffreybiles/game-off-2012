@@ -9,10 +9,10 @@ player.type = 'player'
 player.draw = ->
   ctx.fillStyle = 'black'
   ctx.fillRect(@x,@y,@width,@height)
-  if @slashing > 0
+  if @sword && @sword.timer > 0
     ctx.fillStyle = 'red'
-    ctx.fillRect(@slashx, @slashy, @width, @height)
-    @slashing -= 1
+    ctx.fillRect(@sword.x, @sword.y, @sword.width, @sword.height)
+    @sword.timer -= 1
 
 player.control = ->
   if @kup then @dy -= @acceleration; @direction = Math.PI/2
@@ -24,19 +24,12 @@ player.hit = (collider) ->
   @knockback(collider)
   log(@x, @y)
 
-
-player.checkCollisions = (colliders) ->
-  for collider in colliders
-    if @x + @width > collider.x > @x - collider.width
-      if @y + @height > collider.y > @y - collider.height
-        @hit(collider)
-        collider.hit(@)
-
 player.slash = ->
-  @slashx = @x + Math.cos(@direction)*@width
-  @slashy = @y - Math.sin(@direction)*@height
-  #all this crap about numbers is only until we get animation
-  @slashing = 10
+  sword = object(swordPrototype)
+  sword.place(@x, @y, @width, @height, @direction)
+  sword.checkCollisions(enemies)
+  @sword = sword
+
 
 module.exports = player
 
