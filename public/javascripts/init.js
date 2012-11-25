@@ -2,7 +2,7 @@
   canvas = document.getElementById("mainCanvas")
   ctx = canvas.getContext("2d")
 
-  player = require('./player')
+  player = require('./entities/player')
 
   Mousetrap.bind('space', function(){player.slash()})
   Mousetrap.hold('up', player, 'kup')

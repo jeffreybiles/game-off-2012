@@ -1,7 +1,7 @@
 window.onload = function(){
-  require('./animationFrame')
-  require('./helper')
-  require('./mousetrap')
-  require('./extratrap')
+  require('./lib/animationFrame')
+  require('./lib/helper')
+  require('./lib/mousetrap')
+  require('./lib/extratrap')
   require('./init')
 }
