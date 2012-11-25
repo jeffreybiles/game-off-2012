@@ -448,68 +448,24 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
-require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity;
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
 
-  entity = new Object();
+  playerPrototype = require('./entities/player')
+  enemyPrototype = require('./entities/enemy')
+  swordPrototype = require('./entities/sword')
+  game = require('./game')
 
-  entity.x = 0;
+  Mousetrap.bind('space', function(){game.player.slash()})
+  Mousetrap.hold('up', game.player, 'kup')
+  Mousetrap.hold('down', game.player, 'kdown')
+  Mousetrap.hold('left', game.player, 'kleft')
+  Mousetrap.hold('right', game.player, 'kright')
 
-  entity.y = 0;
-
-  entity.dx = 0;
-
-  entity.dy = 0;
-
-  entity.acceleration = 0.2;
-
-  entity.deceleration = 0.9;
-
-  entity.height = 50;
-
-  entity.width = 50;
-
-  entity.bounciness = 0.2;
-
-  entity.color = 'black';
-
-  entity.direction = 0;
-
-  entity.update = function() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.dx *= this.deceleration;
-    return this.dy *= this.deceleration;
-  };
-
-  entity.knockback = function(collider) {
-    this.dx += (this.x - collider.x) * this.bounciness;
-    return this.dy += (this.y - collider.y) * this.bounciness;
-  };
-
-  entity.checkCollisions = function(colliders) {
-    var collider, _i, _len, _ref, _ref1, _results;
-    _results = [];
-    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
-      collider = colliders[_i];
-      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
-        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
-          this.hit(collider);
-          _results.push(collider.hit(this));
-        } else {
-          _results.push(void 0);
-        }
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  module.exports = entity;
-
-}).call(this);
-
+  start = require('./start')
+  start()
+})()
 });
 
 require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -575,38 +531,55 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
 });
 
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
 
-  playerPrototype = require('./entities/player')
-  enemyPrototype = require('./entities/enemy')
-  swordPrototype = require('./entities/sword')
-  game = require('./game')
+  enemy = object(require('./player'));
 
-  Mousetrap.bind('space', function(){game.player.slash()})
-  Mousetrap.hold('up', game.player, 'kup')
-  Mousetrap.hold('down', game.player, 'kdown')
-  Mousetrap.hold('left', game.player, 'kleft')
-  Mousetrap.hold('right', game.player, 'kright')
+  enemy.type = 'enemy';
 
-  start = require('./start')
-  start()
-})()
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= 10;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
 });
 
-require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game;
+require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, sword;
 
-  game = new Object();
+  entity = require('./entity');
 
-  game.player = require('./entities/player');
+  sword = object(entity);
 
-  game.enemies = [];
+  sword.place = function(x, y, width, height, direction) {
+    sword.x = x + Math.cos(direction) * width;
+    sword.y = y - Math.sin(direction) * height;
+    sword.width = width;
+    return sword.height = height;
+  };
 
-  game.latestEnemy = null;
+  sword.timer = 10;
 
-  module.exports = game;
+  sword.hit = function(hit) {
+    hit.hp -= 20;
+    return game.latestEnemy = hit;
+  };
+
+  module.exports = sword;
 
 }).call(this);
 
@@ -670,55 +643,106 @@ require.define("/start.coffee",function(require,module,exports,__dirname,__filen
 
 });
 
-require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity, sword;
+require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity;
 
-  entity = require('./entity');
+  entity = new Object();
 
-  sword = object(entity);
+  entity.x = 0;
 
-  sword.place = function(x, y, width, height, direction) {
-    sword.x = x + Math.cos(direction) * width;
-    sword.y = y - Math.sin(direction) * height;
-    sword.width = width;
-    return sword.height = height;
+  entity.y = 0;
+
+  entity.dx = 0;
+
+  entity.dy = 0;
+
+  entity.acceleration = 0.2;
+
+  entity.deceleration = 0.9;
+
+  entity.height = 50;
+
+  entity.width = 50;
+
+  entity.bounciness = 0.2;
+
+  entity.color = 'black';
+
+  entity.direction = 0;
+
+  entity.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.dx *= this.deceleration;
+    this.dy *= this.deceleration;
+    return this.stayInBounds();
   };
 
-  sword.timer = 10;
-
-  sword.hit = function(hit) {
-    hit.hp -= 20;
-    return game.latestEnemy = hit;
+  entity.stayInBounds = function() {
+    if (this.x < game.leftEdge) {
+      this.dx += 10 * this.bounciness;
+    }
+    if (this.x + this.width > game.rightEdge) {
+      this.dx -= 10 * this.bounciness;
+    }
+    if (this.y < game.topEdge) {
+      this.dy += 10 * this.bounciness;
+    }
+    if (this.y + this.height > game.bottomEdge) {
+      return this.dy -= 10 * this.bounciness;
+    }
   };
 
-  module.exports = sword;
+  entity.knockback = function(collider) {
+    this.dx += (this.x - collider.x) * this.bounciness;
+    return this.dy += (this.y - collider.y) * this.bounciness;
+  };
+
+  entity.checkCollisions = function(colliders) {
+    var collider, _i, _len, _ref, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
+      collider = colliders[_i];
+      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
+        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
+          this.hit(collider);
+          _results.push(collider.hit(this));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  module.exports = entity;
 
 }).call(this);
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
+require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var game;
 
-  enemy = object(require('./player'));
+  game = new Object();
 
-  enemy.type = 'enemy';
+  game.player = require('./entities/player');
 
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
+  game.enemies = [];
 
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= 10;
-  };
+  game.latestEnemy = null;
 
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
+  game.leftEdge = 0;
 
-  module.exports = enemy;
+  game.rightEdge = canvas.width;
+
+  game.topEdge = 0;
+
+  game.bottomEdge = canvas.height;
+
+  module.exports = game;
 
 }).call(this);
 

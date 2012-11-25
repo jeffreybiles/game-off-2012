@@ -17,6 +17,13 @@ entity.update = ->
   @y += @dy
   @dx *= @deceleration
   @dy *= @deceleration
+  @stayInBounds()
+
+entity.stayInBounds = ->
+  if @x < game.leftEdge then @dx += 10*@bounciness
+  if @x + @width > game.rightEdge then @dx -= 10*@bounciness
+  if @y < game.topEdge then @dy += 10*@bounciness
+  if @y + @height > game.bottomEdge then @dy -= 10*@bounciness
 
 entity.knockback = (collider) ->
   @dx += (@x - collider.x)*@bounciness
