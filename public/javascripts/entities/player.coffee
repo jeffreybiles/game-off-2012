@@ -3,7 +3,7 @@ player = object(entity)
 
 player.x = canvas.width/2
 player.y = canvas.height/2
-
+player.hp = 100
 player.type = 'player'
 
 player.draw = ->
@@ -24,9 +24,6 @@ player.hit = (collider) ->
   @knockback(collider)
   log(@x, @y)
 
-player.knockback = (collider) ->
-  @dx += (@x - collider.x)/5
-  @dy += (@y - collider.y)/5
 
 player.checkCollisions = (colliders) ->
   for collider in colliders

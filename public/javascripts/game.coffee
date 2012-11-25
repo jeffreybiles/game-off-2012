@@ -15,6 +15,8 @@ drawBackground = ->
   color = 128
   ctx.fillStyle = "rgb(#{color},#{color},#{color})"
   ctx.fillRect(0,0,canvas.width,canvas.height)
+  ctx.fillStyle = 'red'
+  ctx.fillRect(10, 10, player.hp + 10, 10)
 
 enemyFactory = (num) ->
   for n in [1..num]

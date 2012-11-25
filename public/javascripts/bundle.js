@@ -467,12 +467,67 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
 })()
 });
 
+require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity;
+
+  entity = new Object();
+
+  entity.x = 0;
+
+  entity.y = 0;
+
+  entity.dx = 0;
+
+  entity.dy = 0;
+
+  entity.acceleration = 0.2;
+
+  entity.deceleration = 0.9;
+
+  entity.height = 50;
+
+  entity.width = 50;
+
+  entity.bounciness = 0.2;
+
+  entity.color = 'black';
+
+  entity.direction = 0;
+
+  entity.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.dx *= this.deceleration;
+    return this.dy *= this.deceleration;
+  };
+
+  entity.knockback = function(collider) {
+    this.dx += (this.x - collider.x) * this.bounciness;
+    return this.dy += (this.y - collider.y) * this.bounciness;
+  };
+
+  module.exports = entity;
+
+}).call(this);
+
+});
+
 require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var enemy;
 
   enemy = object(player);
 
   enemy.type = 'enemy';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    hitter.hp -= 10;
+    return log(hitter.hp);
+  };
 
   enemy.randomizePosition = function() {
     this.x = Math.random() * canvas.width;
@@ -495,6 +550,8 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   player.x = canvas.width / 2;
 
   player.y = canvas.height / 2;
+
+  player.hp = 100;
 
   player.type = 'player';
 
@@ -530,11 +587,6 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   player.hit = function(collider) {
     this.knockback(collider);
     return log(this.x, this.y);
-  };
-
-  player.knockback = function(collider) {
-    this.dx += (this.x - collider.x) / 5;
-    return this.dy += (this.y - collider.y) / 5;
   };
 
   player.checkCollisions = function(colliders) {
@@ -594,7 +646,9 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     var color;
     color = 128;
     ctx.fillStyle = "rgb(" + color + "," + color + "," + color + ")";
-    return ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'red';
+    return ctx.fillRect(10, 10, player.hp + 10, 10);
   };
 
   enemyFactory = function(num) {
@@ -614,40 +668,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = start;
-
-}).call(this);
-
-});
-
-require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity;
-
-  entity = new Object();
-
-  entity.dx = 0;
-
-  entity.dy = 0;
-
-  entity.acceleration = 0.2;
-
-  entity.deceleration = 0.9;
-
-  entity.height = 50;
-
-  entity.width = 50;
-
-  entity.color = 'black';
-
-  entity.direction = 0;
-
-  entity.update = function() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.dx *= this.deceleration;
-    return this.dy *= this.deceleration;
-  };
-
-  module.exports = entity;
 
 }).call(this);
 
