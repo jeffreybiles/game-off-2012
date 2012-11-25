@@ -676,6 +676,21 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
+require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl1;
+
+  level = require('./level');
+
+  lvl1 = object(level);
+
+  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2]];
+
+  module.exports = lvl1;
+
+}).call(this);
+
+});
+
 require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var height, level, squares, width;
 
@@ -723,23 +738,8 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
 
 });
 
-require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl1;
-
-  level = require('./level');
-
-  lvl1 = object(level);
-
-  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2]];
-
-  module.exports = lvl1;
-
-}).call(this);
-
-});
-
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, level;
+  var game, lvl1;
 
   game = new Object();
 
@@ -757,7 +757,9 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.currentLevel = 1;
 
-  level = null;
+  lvl1 = require('./levels/1');
+
+  game.level = eval("lvl" + game.currentLevel);
 
   game.mainLoop = function() {
     var enemy, _i, _len, _ref, _results,
@@ -802,7 +804,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   game.drawBackground = function() {
-    level.draw();
+    this.level.draw();
     ctx.fillStyle = 'red';
     ctx.fillRect(10, 10, game.player.hp + 10, 10);
     if (this.latestEnemy) {
@@ -812,8 +814,8 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.start = function() {
     this.player = object(playerPrototype);
-    level = require("./levels/" + this.currentLevel);
-    game.enemies = [];
+    this.level = eval("lvl" + this.currentLevel);
+    this.enemies = [];
     enemyFactory(4);
     this.latestEnemy = this.enemies[0];
     return this.mainLoop();
