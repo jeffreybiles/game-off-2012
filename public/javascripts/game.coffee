@@ -5,9 +5,11 @@ mainLoop = ->
   drawBackground()
   player.checkCollisions(enemies)
   player.update()
+  player.control()
   player.draw()
-  enemy.draw() for enemy in enemies
-
+  for enemy in enemies
+    enemy.draw()
+    enemy.update()
 
 drawBackground = ->
   color = 128

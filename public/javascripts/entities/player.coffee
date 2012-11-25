@@ -1,12 +1,8 @@
-player = new Object()
+entity = require('./entity')
+player = object(entity)
 
 player.x = canvas.width/2
 player.y = canvas.height/2
-player.height = 50
-player.width = 50
-
-player.color = 'black'
-player.direction = 0
 
 player.type = 'player'
 
@@ -18,14 +14,19 @@ player.draw = ->
     ctx.fillRect(@slashx, @slashy, @width, @height)
     @slashing -= 1
 
-player.update = ->
-  if @kup then @y -= 1; @direction = Math.PI/2
-  if @kdown then @y += 1; @direction = Math.PI*3/2
-  if @kleft then @x -= 1; @direction = Math.PI
-  if @kright then @x += 1; @direction = 0
+player.control = ->
+  if @kup then @dy -= @acceleration; @direction = Math.PI/2
+  if @kdown then @dy += @acceleration; @direction = Math.PI*3/2
+  if @kleft then @dx -= @acceleration; @direction = Math.PI
+  if @kright then @dx += @acceleration; @direction = 0
 
 player.hit = (collider) ->
+  @knockback(collider)
   log(@x, @y)
+
+player.knockback = (collider) ->
+  @dx += (@x - collider.x)/5
+  @dy += (@y - collider.y)/5
 
 player.checkCollisions = (colliders) ->
   for collider in colliders

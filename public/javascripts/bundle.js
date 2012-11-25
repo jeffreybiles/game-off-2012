@@ -467,22 +467,34 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
 })()
 });
 
-require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var player;
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
 
-  player = new Object();
+  enemy = object(player);
+
+  enemy.type = 'enemy';
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
+require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, player;
+
+  entity = require('./entity');
+
+  player = object(entity);
 
   player.x = canvas.width / 2;
 
   player.y = canvas.height / 2;
-
-  player.height = 50;
-
-  player.width = 50;
-
-  player.color = 'black';
-
-  player.direction = 0;
 
   player.type = 'player';
 
@@ -496,27 +508,33 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
     }
   };
 
-  player.update = function() {
+  player.control = function() {
     if (this.kup) {
-      this.y -= 1;
+      this.dy -= this.acceleration;
       this.direction = Math.PI / 2;
     }
     if (this.kdown) {
-      this.y += 1;
+      this.dy += this.acceleration;
       this.direction = Math.PI * 3 / 2;
     }
     if (this.kleft) {
-      this.x -= 1;
+      this.dx -= this.acceleration;
       this.direction = Math.PI;
     }
     if (this.kright) {
-      this.x += 1;
+      this.dx += this.acceleration;
       return this.direction = 0;
     }
   };
 
   player.hit = function(collider) {
+    this.knockback(collider);
     return log(this.x, this.y);
+  };
+
+  player.knockback = function(collider) {
+    this.dx += (this.x - collider.x) / 5;
+    return this.dy += (this.y - collider.y) / 5;
   };
 
   player.checkCollisions = function(colliders) {
@@ -550,26 +568,6 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(player);
-
-  enemy.type = 'enemy';
-
-  enemy.hit = function(hitter) {};
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var drawBackground, enemyFactory, mainLoop, start;
 
@@ -581,11 +579,13 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     drawBackground();
     player.checkCollisions(enemies);
     player.update();
+    player.control();
     player.draw();
     _results = [];
     for (_i = 0, _len = enemies.length; _i < _len; _i++) {
       enemy = enemies[_i];
-      _results.push(enemy.draw());
+      enemy.draw();
+      _results.push(enemy.update());
     }
     return _results;
   };
@@ -614,6 +614,40 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = start;
+
+}).call(this);
+
+});
+
+require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity;
+
+  entity = new Object();
+
+  entity.dx = 0;
+
+  entity.dy = 0;
+
+  entity.acceleration = 0.2;
+
+  entity.deceleration = 0.9;
+
+  entity.height = 50;
+
+  entity.width = 50;
+
+  entity.color = 'black';
+
+  entity.direction = 0;
+
+  entity.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.dx *= this.deceleration;
+    return this.dy *= this.deceleration;
+  };
+
+  module.exports = entity;
 
 }).call(this);
 

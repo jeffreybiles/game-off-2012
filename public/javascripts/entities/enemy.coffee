@@ -1,7 +1,7 @@
 enemy = object(player)
 enemy.type = 'enemy'
 
-enemy.hit = (hitter) ->
+# enemy.hit = (hitter) ->
   #damage enemy
   #damage player
 
