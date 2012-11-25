@@ -448,6 +448,23 @@ require.define("/extratrap.js",function(require,module,exports,__dirname,__filen
 })();
 });
 
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
+
+  player = require('./player')
+
+  Mousetrap.bind('space', function(){player.slash()})
+  Mousetrap.hold('up', player, 'kup')
+  Mousetrap.hold('down', player, 'kdown')
+  Mousetrap.hold('left', player, 'kleft')
+  Mousetrap.hold('right', player, 'kright')
+
+  start = require('./game')
+  start()
+})()
+});
+
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var drawBackground, mainLoop, start;
 
@@ -455,6 +472,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     window.requestAnimationFrame(function() {
       return mainLoop();
     });
+    drawBackground();
     player.update();
     return player.draw();
   };
@@ -476,23 +494,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-
-  player = require('./player')
-
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
-
-  start = require('./game')
-  start()
-})()
-});
-
 require.define("/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var player;
 
@@ -512,7 +513,12 @@ require.define("/player.coffee",function(require,module,exports,__dirname,__file
 
   player.draw = function() {
     ctx.fillStyle = 'black';
-    return ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    if (this.slashing > 0) {
+      ctx.fillStyle = 'red';
+      ctx.fillRect(this.slashx, this.slashy, this.width, this.height);
+      return this.slashing -= 1;
+    }
   };
 
   player.update = function() {
@@ -535,11 +541,9 @@ require.define("/player.coffee",function(require,module,exports,__dirname,__file
   };
 
   player.slash = function() {
-    var x, y;
-    x = this.x + Math.cos(this.direction) * this.width;
-    y = this.y - Math.sin(this.direction) * this.height;
-    ctx.fillStyle = 'red';
-    return ctx.fillRect(x, y, this.width, this.height);
+    this.slashx = this.x + Math.cos(this.direction) * this.width;
+    this.slashy = this.y - Math.sin(this.direction) * this.height;
+    return this.slashing = 10;
   };
 
   module.exports = player;

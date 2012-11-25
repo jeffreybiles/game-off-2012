@@ -11,7 +11,10 @@ player.direction = 0
 player.draw = ->
   ctx.fillStyle = 'black'
   ctx.fillRect(@x,@y,@width,@height)
-  #do something here about drawing the slash?
+  if @slashing > 0
+    ctx.fillStyle = 'red'
+    ctx.fillRect(@slashx, @slashy, @width, @height)
+    @slashing -= 1
 
 player.update = ->
   if @kup then @y -= 1; @direction = Math.PI/2
@@ -20,10 +23,10 @@ player.update = ->
   if @kright then @x += 1; @direction = 0
 
 player.slash = ->
-  x = @x + Math.cos(@direction)*@width
-  y = @y - Math.sin(@direction)*@height
-  ctx.fillStyle = 'red'
-  ctx.fillRect(x, y, @width, @height)
+  @slashx = @x + Math.cos(@direction)*@width
+  @slashy = @y - Math.sin(@direction)*@height
+  #all this crap about numbers is only until we get animation
+  @slashing = 10
 
 module.exports = player
 
