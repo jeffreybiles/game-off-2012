@@ -26,7 +26,7 @@ enemyFactory = (num) ->
     enemies.push(newEnemy)
 
 start = ->
-  enemyFactory(2)
+  enemyFactory(4)
   latestEnemy[0] = enemies[0]
   mainLoop()
 

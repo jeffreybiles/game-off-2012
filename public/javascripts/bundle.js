@@ -700,7 +700,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   start = function() {
-    enemyFactory(2);
+    enemyFactory(4);
     latestEnemy[0] = enemies[0];
     return mainLoop();
   };
