@@ -10,8 +10,10 @@
     "jade": "*",
     "stylus": "*",
     "coffee-script": "~1.4.0",
-    "browserify": "~1.16.4",
-    "node-dev": "~0.2.9"
+    "browserify": "~1.16.4"
+  },
+  "devDependencies": {
+    "node-dev": "~0.2.8"
   },
   "subdomain": "jeffreybiles.gameoff",
   "engines": {

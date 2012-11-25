@@ -1,4 +1,3 @@
-
 player = new Object()
 
 player.x = canvas.width/2
@@ -10,8 +9,13 @@ player.color = 'black'
 
 player.draw = ->
   ctx.fillStyle = 'black'
-  log(@x, @y, @width, @height)
   ctx.fillRect(@x,@y,@width,@height)
+
+player.update = ->
+  if @kup then @y -= 1
+  if @kdown then @y += 1
+  if @kleft then @x -= 1
+  if @kright then @x += 1
 
 module.exports = player
 

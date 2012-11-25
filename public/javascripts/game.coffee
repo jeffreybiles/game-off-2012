@@ -3,7 +3,7 @@ mainLoop = ->
     mainLoop()
 
   drawBackground()
-  player.x += 1
+  player.update()
   player.draw()
 
 drawBackground = ->
