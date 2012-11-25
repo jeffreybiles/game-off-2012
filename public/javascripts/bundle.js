@@ -448,24 +448,6 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-
-  player = require('./entities/player')
-  enemy = require('./entities/enemy')
-
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
-
-  start = require('./game')
-  start()
-})()
-});
-
 require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var player;
 
@@ -524,32 +506,23 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(player);
-
-  enemy.x = 10;
-
-  enemy.y = 10;
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var drawBackground, mainLoop, start;
+  var drawBackground, enemyFactory, mainLoop, start;
 
   mainLoop = function() {
+    var enemy, _i, _len, _results;
     window.requestAnimationFrame(function() {
       return mainLoop();
     });
     drawBackground();
     player.update();
     player.draw();
-    return enemy.draw();
+    _results = [];
+    for (_i = 0, _len = enemies.length; _i < _len; _i++) {
+      enemy = enemies[_i];
+      _results.push(enemy.draw());
+    }
+    return _results;
   };
 
   drawBackground = function() {
@@ -559,7 +532,19 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     return ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
+  enemyFactory = function(num) {
+    var n, newEnemy, _i, _results;
+    _results = [];
+    for (n = _i = 1; 1 <= num ? _i <= num : _i >= num; n = 1 <= num ? ++_i : --_i) {
+      newEnemy = object(enemyPrototype);
+      newEnemy.randomizePosition();
+      _results.push(enemies.push(newEnemy));
+    }
+    return _results;
+  };
+
   start = function() {
+    enemyFactory(1);
     return mainLoop();
   };
 
@@ -567,6 +552,41 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 }).call(this);
 
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(player);
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
+
+  player = require('./entities/player')
+  enemies = []
+  enemyPrototype = require('./entities/enemy')
+
+  Mousetrap.bind('space', function(){player.slash()})
+  Mousetrap.hold('up', player, 'kup')
+  Mousetrap.hold('down', player, 'kdown')
+  Mousetrap.hold('left', player, 'kleft')
+  Mousetrap.hold('right', player, 'kright')
+
+  start = require('./game')
+  start()
+})()
 });
 
 require.define("/entry.js",function(require,module,exports,__dirname,__filename,process,global){window.onload = function(){

@@ -3,7 +3,8 @@
   ctx = canvas.getContext("2d")
 
   player = require('./entities/player')
-  enemy = require('./entities/enemy')
+  enemies = []
+  enemyPrototype = require('./entities/enemy')
 
   Mousetrap.bind('space', function(){player.slash()})
   Mousetrap.hold('up', player, 'kup')

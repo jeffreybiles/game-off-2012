@@ -1,5 +1,6 @@
 enemy = object(player)
-enemy.x = 10
-enemy.y = 10
+enemy.randomizePosition = ->
+  @x = Math.random()*canvas.width
+  @y = Math.random()*canvas.height
 
 module.exports = enemy
