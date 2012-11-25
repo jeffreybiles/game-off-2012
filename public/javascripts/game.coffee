@@ -24,13 +24,14 @@ game.mainLoop = ->
   @player.update()
   @player.control()
   @player.draw()
+  @level.interactWith(@player)
 
   @cleanDeadEnemies()
 
   for enemy in @enemies
     enemy.draw()
     enemy.update()
-
+    @level.interactWith(enemy)
 game.cleanDeadEnemies = ->
   @enemies = (enemy for enemy in @enemies when enemy.hp > 0)
 

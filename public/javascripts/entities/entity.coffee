@@ -3,7 +3,7 @@ entity.x = 0
 entity.y = 0
 entity.dx = 0
 entity.dy = 0
-entity.acceleration = 0.2
+entity.acceleration = 0.3
 entity.deceleration = 0.9
 entity.height = 50
 entity.width = 50
@@ -20,14 +20,17 @@ entity.update = ->
   @stayInBounds()
 
 entity.stayInBounds = ->
-  if @x < game.leftEdge then @dx += 10*@bounciness
-  if @x + @width > game.rightEdge then @dx -= 10*@bounciness
-  if @y < game.topEdge then @dy += 10*@bounciness
-  if @y + @height > game.bottomEdge then @dy -= 10*@bounciness
+  totalBounce = 10*@bounciness
+  if @x < game.leftEdge then @dx += totalBounce
+  if @x + @width > game.rightEdge then @dx -= totalBounce
+  if @y < game.topEdge then @dy += totalBounce
+  if @y + @height > game.bottomEdge then @dy -= totalBounce
 
-entity.knockback = (collider) ->
-  @dx += (@x - collider.x)*@bounciness
-  @dy += (@y - collider.y)*@bounciness
+entity.knockback = (collider, extraBouncy = 1) ->
+  if extraBouncy > 0
+    console.log(@x, collider.x, @y, collider.y, @bounciness, extraBouncy)
+  @dx += (@x - collider.x)*@bounciness*extraBouncy
+  @dy += (@y - collider.y)*@bounciness*extraBouncy
 
 entity.checkCollisions = (colliders) ->
   for collider in colliders

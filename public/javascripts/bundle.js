@@ -542,86 +542,6 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
 });
 
-require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity;
-
-  entity = new Object();
-
-  entity.x = 0;
-
-  entity.y = 0;
-
-  entity.dx = 0;
-
-  entity.dy = 0;
-
-  entity.acceleration = 0.2;
-
-  entity.deceleration = 0.9;
-
-  entity.height = 50;
-
-  entity.width = 50;
-
-  entity.bounciness = 0.2;
-
-  entity.color = 'black';
-
-  entity.direction = 0;
-
-  entity.update = function() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.dx *= this.deceleration;
-    this.dy *= this.deceleration;
-    return this.stayInBounds();
-  };
-
-  entity.stayInBounds = function() {
-    if (this.x < game.leftEdge) {
-      this.dx += 10 * this.bounciness;
-    }
-    if (this.x + this.width > game.rightEdge) {
-      this.dx -= 10 * this.bounciness;
-    }
-    if (this.y < game.topEdge) {
-      this.dy += 10 * this.bounciness;
-    }
-    if (this.y + this.height > game.bottomEdge) {
-      return this.dy -= 10 * this.bounciness;
-    }
-  };
-
-  entity.knockback = function(collider) {
-    this.dx += (this.x - collider.x) * this.bounciness;
-    return this.dy += (this.y - collider.y) * this.bounciness;
-  };
-
-  entity.checkCollisions = function(colliders) {
-    var collider, _i, _len, _ref, _ref1, _results;
-    _results = [];
-    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
-      collider = colliders[_i];
-      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
-        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
-          this.hit(collider);
-          _results.push(collider.hit(this));
-        } else {
-          _results.push(void 0);
-        }
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  module.exports = entity;
-
-}).call(this);
-
-});
-
 require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var enemy;
 
@@ -683,7 +603,7 @@ require.define("/levels/1.coffee",function(require,module,exports,__dirname,__fi
 
   lvl1 = object(level);
 
-  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2]];
+  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 3, 3, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]];
 
   module.exports = lvl1;
 
@@ -692,22 +612,31 @@ require.define("/levels/1.coffee",function(require,module,exports,__dirname,__fi
 });
 
 require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var height, level, squares, width;
+  var level, terrainTypes;
 
   level = new Object();
 
-  squares = {
+  terrainTypes = {
     1: {
-      color: '#68432a'
+      color: '#68432a',
+      bounciness: 0,
+      damage: 0
     },
     2: {
-      color: '#126822'
+      color: '#126822',
+      bounciness: 0,
+      damage: 0
+    },
+    3: {
+      color: '#FF0',
+      bounciness: 1,
+      damage: 10
     }
   };
 
-  width = 50;
+  level.columnWidth = 50;
 
-  height = 50;
+  level.rowHeight = 50;
 
   level.draw = function() {
     var column, row, _i, _results;
@@ -728,8 +657,26 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
   level.drawSquare = function(row, column) {
     var square;
     square = this.grid[row][column];
-    ctx.fillStyle = squares[square].color;
-    return ctx.fillRect(column * width, row * height, width, height);
+    ctx.fillStyle = terrainTypes[square].color;
+    return ctx.fillRect(column * this.columnWidth, row * this.rowHeight, this.columnWidth, this.rowHeight);
+  };
+
+  level.interactWith = function(entity) {
+    var column, row, squaresOccupied, terrain, _i, _len, _ref, _results;
+    column = Math.floor(entity.x / this.columnWidth);
+    row = Math.floor(entity.y / this.rowHeight);
+    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
+    _results = [];
+    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
+      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
+      terrain = terrainTypes[this.grid[row][column]];
+      entity.knockback({
+        x: column * this.rowHeight,
+        y: row * this.columnWidth
+      }, terrain.bounciness);
+      _results.push(entity.hp -= terrain.damage);
+    }
+    return _results;
   };
 
   module.exports = level;
@@ -776,13 +723,15 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     this.player.update();
     this.player.control();
     this.player.draw();
+    this.level.interactWith(this.player);
     this.cleanDeadEnemies();
     _ref = this.enemies;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       enemy = _ref[_i];
       enemy.draw();
-      _results.push(enemy.update());
+      enemy.update();
+      _results.push(this.level.interactWith(enemy));
     }
     return _results;
   };
@@ -822,6 +771,94 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = game;
+
+}).call(this);
+
+});
+
+require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity;
+
+  entity = new Object();
+
+  entity.x = 0;
+
+  entity.y = 0;
+
+  entity.dx = 0;
+
+  entity.dy = 0;
+
+  entity.acceleration = 0.3;
+
+  entity.deceleration = 0.9;
+
+  entity.height = 50;
+
+  entity.width = 50;
+
+  entity.bounciness = 0.2;
+
+  entity.color = 'black';
+
+  entity.direction = 0;
+
+  entity.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.dx *= this.deceleration;
+    this.dy *= this.deceleration;
+    return this.stayInBounds();
+  };
+
+  entity.stayInBounds = function() {
+    var totalBounce;
+    totalBounce = 10 * this.bounciness;
+    if (this.x < game.leftEdge) {
+      this.dx += totalBounce;
+    }
+    if (this.x + this.width > game.rightEdge) {
+      this.dx -= totalBounce;
+    }
+    if (this.y < game.topEdge) {
+      this.dy += totalBounce;
+    }
+    if (this.y + this.height > game.bottomEdge) {
+      return this.dy -= totalBounce;
+    }
+  };
+
+  entity.knockback = function(collider, extraBouncy) {
+    if (extraBouncy == null) {
+      extraBouncy = 1;
+    }
+    if (extraBouncy > 0) {
+      console.log(this.x, collider.x, this.y, collider.y, this.bounciness, extraBouncy);
+    }
+    this.dx += (this.x - collider.x) * this.bounciness * extraBouncy;
+    return this.dy += (this.y - collider.y) * this.bounciness * extraBouncy;
+  };
+
+  entity.checkCollisions = function(colliders) {
+    var collider, _i, _len, _ref, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
+      collider = colliders[_i];
+      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
+        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
+          this.hit(collider);
+          _results.push(collider.hit(this));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  module.exports = entity;
 
 }).call(this);
 
