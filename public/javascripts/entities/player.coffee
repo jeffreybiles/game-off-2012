@@ -8,6 +8,8 @@ player.width = 50
 player.color = 'black'
 player.direction = 0
 
+player.type = 'player'
+
 player.draw = ->
   ctx.fillStyle = 'black'
   ctx.fillRect(@x,@y,@width,@height)
@@ -21,6 +23,16 @@ player.update = ->
   if @kdown then @y += 1; @direction = Math.PI*3/2
   if @kleft then @x -= 1; @direction = Math.PI
   if @kright then @x += 1; @direction = 0
+
+player.hit = (collider) ->
+  log(@x, @y)
+
+player.checkCollisions = (colliders) ->
+  for collider in colliders
+    if @x + @width > collider.x > @x - collider.width
+      if @y + @height > collider.y > @y - collider.height
+        @hit(collider)
+        collider.hit(@)
 
 player.slash = ->
   @slashx = @x + Math.cos(@direction)*@width

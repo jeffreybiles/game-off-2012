@@ -448,6 +448,25 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
+
+  player = require('./entities/player')
+  enemies = []
+  enemyPrototype = require('./entities/enemy')
+
+  Mousetrap.bind('space', function(){player.slash()})
+  Mousetrap.hold('up', player, 'kup')
+  Mousetrap.hold('down', player, 'kdown')
+  Mousetrap.hold('left', player, 'kleft')
+  Mousetrap.hold('right', player, 'kright')
+
+  start = require('./game')
+  start()
+})()
+});
+
 require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var player;
 
@@ -464,6 +483,8 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   player.color = 'black';
 
   player.direction = 0;
+
+  player.type = 'player';
 
   player.draw = function() {
     ctx.fillStyle = 'black';
@@ -494,6 +515,29 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
     }
   };
 
+  player.hit = function(collider) {
+    return log(this.x, this.y);
+  };
+
+  player.checkCollisions = function(colliders) {
+    var collider, _i, _len, _ref, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
+      collider = colliders[_i];
+      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
+        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
+          this.hit(collider);
+          _results.push(collider.hit(this));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   player.slash = function() {
     this.slashx = this.x + Math.cos(this.direction) * this.width;
     this.slashy = this.y - Math.sin(this.direction) * this.height;
@@ -501,6 +545,26 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   };
 
   module.exports = player;
+
+}).call(this);
+
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(player);
+
+  enemy.type = 'enemy';
+
+  enemy.hit = function(hitter) {};
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  module.exports = enemy;
 
 }).call(this);
 
@@ -515,6 +579,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
       return mainLoop();
     });
     drawBackground();
+    player.checkCollisions(enemies);
     player.update();
     player.draw();
     _results = [];
@@ -552,41 +617,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 }).call(this);
 
-});
-
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(player);
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-
-  player = require('./entities/player')
-  enemies = []
-  enemyPrototype = require('./entities/enemy')
-
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
-
-  start = require('./game')
-  start()
-})()
 });
 
 require.define("/entry.js",function(require,module,exports,__dirname,__filename,process,global){window.onload = function(){
