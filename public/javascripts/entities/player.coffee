@@ -27,7 +27,7 @@ player.hit = (collider) ->
 player.slash = ->
   sword = object(swordPrototype)
   sword.place(@x, @y, @width, @height, @direction)
-  sword.checkCollisions(enemies)
+  sword.checkCollisions(game.enemies)
   @sword = sword
 
 

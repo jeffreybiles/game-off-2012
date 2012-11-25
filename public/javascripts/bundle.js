@@ -448,34 +448,6 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(playerPrototype);
-
-  enemy.type = 'enemy';
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    hitter.hp -= 10;
-    return log(hitter.hp);
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
 require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var entity;
 
@@ -593,7 +565,7 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
     var sword;
     sword = object(swordPrototype);
     sword.place(this.x, this.y, this.width, this.height, this.direction);
-    sword.checkCollisions(enemies);
+    sword.checkCollisions(game.enemies);
     return this.sword = sword;
   };
 
@@ -610,19 +582,92 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
   playerPrototype = require('./entities/player')
   enemyPrototype = require('./entities/enemy')
   swordPrototype = require('./entities/sword')
-  player = object(playerPrototype)
-  enemies = []
-  latestEnemy = []
+  game = require('./game')
 
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
+  Mousetrap.bind('space', function(){game.player.slash()})
+  Mousetrap.hold('up', game.player, 'kup')
+  Mousetrap.hold('down', game.player, 'kdown')
+  Mousetrap.hold('left', game.player, 'kleft')
+  Mousetrap.hold('right', game.player, 'kright')
 
-  start = require('./game')
+  start = require('./start')
   start()
 })()
+});
+
+require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var game;
+
+  game = new Object();
+
+  game.player = require('./entities/player');
+
+  game.enemies = [];
+
+  game.latestEnemy = null;
+
+  module.exports = game;
+
+}).call(this);
+
+});
+
+require.define("/start.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var drawBackground, enemyFactory, mainLoop, start;
+
+  mainLoop = function() {
+    var enemy, _i, _len, _ref, _results;
+    window.requestAnimationFrame(function() {
+      return mainLoop();
+    });
+    drawBackground();
+    game.player.checkCollisions(game.enemies);
+    game.player.update();
+    game.player.control();
+    game.player.draw();
+    _ref = game.enemies;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      enemy = _ref[_i];
+      enemy.draw();
+      _results.push(enemy.update());
+    }
+    return _results;
+  };
+
+  drawBackground = function() {
+    var color;
+    color = 128;
+    ctx.fillStyle = "rgb(" + color + "," + color + "," + color + ")";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'red';
+    ctx.fillRect(10, 10, game.player.hp + 10, 10);
+    if (game.latestEnemy) {
+      return ctx.fillRect(canvas.width - 150, 10, game.latestEnemy.hp, 10);
+    }
+  };
+
+  enemyFactory = function(num) {
+    var n, newEnemy, _i, _results;
+    _results = [];
+    for (n = _i = 1; 1 <= num ? _i <= num : _i >= num; n = 1 <= num ? ++_i : --_i) {
+      newEnemy = object(enemyPrototype);
+      newEnemy.randomizePosition();
+      _results.push(game.enemies.push(newEnemy));
+    }
+    return _results;
+  };
+
+  start = function() {
+    enemyFactory(4);
+    game.latestEnemy = game.enemies[0];
+    return mainLoop();
+  };
+
+  module.exports = start;
+
+}).call(this);
+
 });
 
 require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -643,9 +688,7 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
   sword.hit = function(hit) {
     hit.hp -= 20;
-    log(hit.hp);
-    latestEnemy[0] = hit;
-    return log(latestEnemy);
+    return game.latestEnemy = hit;
   };
 
   module.exports = sword;
@@ -654,58 +697,28 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
-require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var drawBackground, enemyFactory, mainLoop, start;
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
 
-  mainLoop = function() {
-    var enemy, _i, _len, _results;
-    window.requestAnimationFrame(function() {
-      return mainLoop();
-    });
-    drawBackground();
-    player.checkCollisions(enemies);
-    player.update();
-    player.control();
-    player.draw();
-    _results = [];
-    for (_i = 0, _len = enemies.length; _i < _len; _i++) {
-      enemy = enemies[_i];
-      enemy.draw();
-      _results.push(enemy.update());
-    }
-    return _results;
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
   };
 
-  drawBackground = function() {
-    var color;
-    color = 128;
-    ctx.fillStyle = "rgb(" + color + "," + color + "," + color + ")";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'red';
-    ctx.fillRect(10, 10, player.hp + 10, 10);
-    if (latestEnemy[0]) {
-      return ctx.fillRect(canvas.width - 150, 10, latestEnemy[0].hp, 10);
-    }
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= 10;
   };
 
-  enemyFactory = function(num) {
-    var n, newEnemy, _i, _results;
-    _results = [];
-    for (n = _i = 1; 1 <= num ? _i <= num : _i >= num; n = 1 <= num ? ++_i : --_i) {
-      newEnemy = object(enemyPrototype);
-      newEnemy.randomizePosition();
-      _results.push(enemies.push(newEnemy));
-    }
-    return _results;
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
   };
 
-  start = function() {
-    enemyFactory(4);
-    latestEnemy[0] = enemies[0];
-    return mainLoop();
-  };
-
-  module.exports = start;
+  module.exports = enemy;
 
 }).call(this);
 

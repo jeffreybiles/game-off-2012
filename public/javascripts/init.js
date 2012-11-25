@@ -5,16 +5,14 @@
   playerPrototype = require('./entities/player')
   enemyPrototype = require('./entities/enemy')
   swordPrototype = require('./entities/sword')
-  player = object(playerPrototype)
-  enemies = []
-  latestEnemy = []
+  game = require('./game')
 
-  Mousetrap.bind('space', function(){player.slash()})
-  Mousetrap.hold('up', player, 'kup')
-  Mousetrap.hold('down', player, 'kdown')
-  Mousetrap.hold('left', player, 'kleft')
-  Mousetrap.hold('right', player, 'kright')
+  Mousetrap.bind('space', function(){game.player.slash()})
+  Mousetrap.hold('up', game.player, 'kup')
+  Mousetrap.hold('down', game.player, 'kdown')
+  Mousetrap.hold('left', game.player, 'kleft')
+  Mousetrap.hold('right', game.player, 'kright')
 
-  start = require('./game')
+  start = require('./start')
   start()
 })()
