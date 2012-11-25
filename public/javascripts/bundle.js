@@ -417,6 +417,77 @@ require.define("/animationFrame.js",function(require,module,exports,__dirname,__
 }());
 });
 
+require.define("/hellper.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var log, object;
+
+  object = function(o) {
+    var F;
+    F = function() {};
+    F.prototype = o;
+    return new F();
+  };
+
+  log = function(message) {
+    return console.log(message);
+  };
+
+  return [object, log];
+
+}).call(this);
+
+});
+
+require.define("/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  object = function(o){
+    function F(){}
+    F.prototype = o
+    return new F()
+  }
+
+  log = function(){
+    console.log(arguments)
+  }
+})()
+});
+
+require.define("/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var player;
+
+  player = new Object();
+
+  player.x = canvas.width / 2;
+
+  player.y = canvas.height / 2;
+
+  player.height = 50;
+
+  player.width = 50;
+
+  player.color = 'black';
+
+  player.draw = function() {
+    ctx.fillStyle = 'black';
+    log(this.x, this.y, this.width, this.height);
+    return ctx.fillRect(this.x, this.y, this.width, this.height);
+  };
+
+  module.exports = player;
+
+}).call(this);
+
+});
+
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
+
+  player = require('./player')
+
+  start = require('./game')
+  start()
+})()
+});
+
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var drawBackground, mainLoop, start;
 
@@ -446,61 +517,9 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-  console.log("I've defined context")
-  console.log("it's: " + ctx)
-
-  object = function(o){
-    function F(){}
-    F.prototype = o;
-    return new F();
-  }
-
-  log = function(message){
-    console.log(message);
-  }
-
-  global.canvas_width = 800
-  global.canvas_height = 600
-
-  player = require('./player')
-
-  start = require('./game')
-  start()
-})()
-});
-
-require.define("/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var player;
-
-  player = new Object();
-
-  player.x = global.canvas_width / 2;
-
-  player.y = global.canvas_height / 2;
-
-  player.height = 50;
-
-  player.width = 50;
-
-  player.color = 'black';
-
-  player.draw = function() {
-    ctx.fillStyle = 'black';
-    console.log(this.x, this.y, this.width, this.height);
-    return ctx.fillRect(this.x, this.y, this.width, this.height);
-  };
-
-  module.exports = player;
-
-}).call(this);
-
-});
-
 require.define("/entry.js",function(require,module,exports,__dirname,__filename,process,global){window.onload = function(){
   require('./animationFrame')
+  require('./helper')
   require('./init')
 }
 });

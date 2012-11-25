@@ -6,7 +6,6 @@ mainLoop = ->
   player.x += 1
   player.draw()
 
-
 drawBackground = ->
   color = 128
   ctx.fillStyle = "rgb(#{color},#{color},#{color})"
