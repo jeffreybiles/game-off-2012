@@ -4,6 +4,7 @@
 
   player = require('./player')
 
+  Mousetrap.bind('space', function(){player.slash()})
   Mousetrap.hold('up', player, 'kup')
   Mousetrap.hold('down', player, 'kdown')
   Mousetrap.hold('left', player, 'kleft')

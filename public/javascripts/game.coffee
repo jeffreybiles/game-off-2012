@@ -2,7 +2,7 @@ mainLoop = ->
   window.requestAnimationFrame ->
     mainLoop()
 
-  drawBackground()
+  # drawBackground()
   player.update()
   player.draw()
 

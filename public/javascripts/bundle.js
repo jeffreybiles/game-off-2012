@@ -455,7 +455,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     window.requestAnimationFrame(function() {
       return mainLoop();
     });
-    drawBackground();
     player.update();
     return player.draw();
   };
@@ -483,6 +482,7 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
 
   player = require('./player')
 
+  Mousetrap.bind('space', function(){player.slash()})
   Mousetrap.hold('up', player, 'kup')
   Mousetrap.hold('down', player, 'kdown')
   Mousetrap.hold('left', player, 'kleft')
@@ -508,6 +508,8 @@ require.define("/player.coffee",function(require,module,exports,__dirname,__file
 
   player.color = 'black';
 
+  player.direction = 0;
+
   player.draw = function() {
     ctx.fillStyle = 'black';
     return ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -516,16 +518,28 @@ require.define("/player.coffee",function(require,module,exports,__dirname,__file
   player.update = function() {
     if (this.kup) {
       this.y -= 1;
+      this.direction = Math.PI / 2;
     }
     if (this.kdown) {
       this.y += 1;
+      this.direction = Math.PI * 3 / 2;
     }
     if (this.kleft) {
       this.x -= 1;
+      this.direction = Math.PI;
     }
     if (this.kright) {
-      return this.x += 1;
+      this.x += 1;
+      return this.direction = 0;
     }
+  };
+
+  player.slash = function() {
+    var x, y;
+    x = this.x + Math.cos(this.direction) * this.width;
+    y = this.y - Math.sin(this.direction) * this.height;
+    ctx.fillStyle = 'red';
+    return ctx.fillRect(x, y, this.width, this.height);
   };
 
   module.exports = player;
