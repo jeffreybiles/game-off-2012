@@ -453,6 +453,7 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
   ctx = canvas.getContext("2d")
 
   player = require('./entities/player')
+  enemy = require('./entities/enemy')
 
   Mousetrap.bind('space', function(){player.slash()})
   Mousetrap.hold('up', player, 'kup')
@@ -523,6 +524,21 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
 });
 
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(player);
+
+  enemy.x = 10;
+
+  enemy.y = 10;
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var drawBackground, mainLoop, start;
 
@@ -532,7 +548,8 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     });
     drawBackground();
     player.update();
-    return player.draw();
+    player.draw();
+    return enemy.draw();
   };
 
   drawBackground = function() {

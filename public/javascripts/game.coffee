@@ -5,6 +5,7 @@ mainLoop = ->
   drawBackground()
   player.update()
   player.draw()
+  enemy.draw()
 
 drawBackground = ->
   color = 128
