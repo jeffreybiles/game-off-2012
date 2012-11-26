@@ -29,15 +29,15 @@ terrainTypes =
 level.columnWidth = 50
 level.rowHeight = 50
 
-level.draw = ->
+level.draw = (offset = 0) ->
   for row in [0...12]
     for column in [0...16]
-      @drawSquare(row, column)
+      @drawSquare(row, column, offset)
 
-level.drawSquare = (row, column) ->
+level.drawSquare = (row, column, offset) ->
   square = @grid[row][column]
   ctx.fillStyle = terrainTypes[square].color
-  ctx.fillRect(column*@columnWidth, row*@rowHeight, @columnWidth, @rowHeight)
+  ctx.fillRect(column*@columnWidth + offset, row*@rowHeight, @columnWidth, @rowHeight)
 
 level.interactWith = (entity) ->
   column = Math.floor(entity.x/@columnWidth)

@@ -16,6 +16,6 @@ lvl1.grid = [
   [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]
 ]
 
-lvl1.numEnemies = 3
+lvl1.numEnemies = 1
 
 module.exports = lvl1
