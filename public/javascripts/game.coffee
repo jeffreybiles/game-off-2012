@@ -50,7 +50,7 @@ game.drawBackground = ->
   ctx.fillStyle = 'red'
   ctx.fillRect(10, 10, game.player.hp + 10, 10)
   ctx.fillRect(canvas.width - 150, 10, @latestEnemy.hp, 10) if @latestEnemy
-  if @enemies.length == 0
+  # if @enemies.length == 0
     #TODO:  draw an arrow here
 
 game.loadLevel = ->
