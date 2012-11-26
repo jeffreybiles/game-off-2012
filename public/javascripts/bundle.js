@@ -881,8 +881,27 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     ctx.fillStyle = 'red';
     ctx.fillRect(10, 10, game.player.hp + 10, 10);
     if (this.latestEnemy) {
-      return ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
+      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
     }
+    if (this.enemies.length === 0) {
+      this.drawArrow(400);
+      return this.drawArrow(200);
+    }
+  };
+
+  game.drawArrow = function(y) {
+    var height, width, x;
+    x = 700;
+    width = 50;
+    height = 50;
+    ctx.fillStlye = 'black';
+    ctx.fillRect(x - width, y - height / 2, width, height);
+    ctx.beginPath();
+    ctx.moveTo(x, y - height);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+    return ctx.fill();
   };
 
   game.loadLevel = function() {

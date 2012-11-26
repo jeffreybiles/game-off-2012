@@ -50,9 +50,22 @@ game.drawBackground = ->
   ctx.fillStyle = 'red'
   ctx.fillRect(10, 10, game.player.hp + 10, 10)
   ctx.fillRect(canvas.width - 150, 10, @latestEnemy.hp, 10) if @latestEnemy
-  # if @enemies.length == 0
-    #TODO:  draw an arrow here
+  if @enemies.length == 0
+    @drawArrow(400)
+    @drawArrow(200)
 
+game.drawArrow = (y) ->
+  x = 700
+  width = 50
+  height = 50
+  ctx.fillStlye = 'black'
+  ctx.fillRect(x - width, y - height/2, width, height)
+  ctx.beginPath()
+  ctx.moveTo(x, y - height)
+  ctx.lineTo(x + width, y)
+  ctx.lineTo(x, y + height)
+  ctx.closePath()
+  ctx.fill()
 game.loadLevel = ->
   @level = eval("lvl#{@currentLevel}")
   @enemies = []
