@@ -684,6 +684,122 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
+require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var grass, terrain;
+
+  terrain = require('./terrain');
+
+  grass = object(terrain);
+
+  grass.color = '#68432a';
+
+  module.exports = grass;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var lava, terrain;
+
+  terrain = require('./terrain');
+
+  lava = object(terrain);
+
+  lava.color = '#F00';
+
+  lava.damage = 1;
+
+  module.exports = lava;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/dirt.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var dirt, terrain;
+
+  terrain = require('./terrain');
+
+  dirt = object(terrain);
+
+  dirt.color = '#456';
+
+  module.exports = dirt;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/wall.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, wall;
+
+  terrain = require('./terrain');
+
+  wall = object(terrain);
+
+  wall.color = '#225';
+
+  wall.bounciness = 0.2;
+
+  module.exports = wall;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/thorns.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, thorns;
+
+  terrain = require('./terrain');
+
+  thorns = object(terrain);
+
+  thorns.color = '#FF0';
+
+  thorns.bounciness = 2;
+
+  thorns.damage = 10;
+
+  module.exports = thorns;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/terrain.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain;
+
+  terrain = new Object();
+
+  terrain.width = 50;
+
+  terrain.height = 50;
+
+  terrain.color = '#342564';
+
+  terrain.bounciness = 0;
+
+  terrain.damage = 0;
+
+  terrain.row = 0;
+
+  terrain.column = 0;
+
+  terrain.draw = function(offset) {
+    if (offset == null) {
+      offset = 0;
+    }
+    ctx.fillStyle = this.color;
+    return ctx.fillRect(this.column * this.width + offset, this.row * this.height, this.width, this.height);
+  };
+
+  module.exports = terrain;
+
+}).call(this);
+
+});
+
 require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, lvl2;
 
@@ -691,9 +807,11 @@ require.define("/levels/2.coffee",function(require,module,exports,__dirname,__fi
 
   lvl2 = object(level);
 
-  lvl2.grid = [[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2]];
+  lvl2.grid = ['1111111111111111', '1111111111111111', '3333333331111111', '1111111131111111', '1111111131111111', '1111111131111111', '2221111131222222', '1121111131211111', '1121111131211111', '1121111131211111', '1122222222211111', '1111111111111111'];
 
   lvl2.numEnemies = 3;
+
+  lvl2.createTerrain();
 
   module.exports = lvl2;
 
@@ -708,11 +826,105 @@ require.define("/levels/1.coffee",function(require,module,exports,__dirname,__fi
 
   lvl1 = object(level);
 
-  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 3, 3, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 4, 4, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 4, 4, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 5, 5, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]];
+  lvl1.grid = ['1111111111111111', '1111111111111111', '1111111111111111', '2222222221111111', '1111111121111111', '1111111121111111', '1111111121112222', '1111111122222111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
 
   lvl1.numEnemies = 1;
 
+  lvl1.createTerrain();
+
   module.exports = lvl1;
+
+}).call(this);
+
+});
+
+require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var dirt, grass, lava, level, thorns, wall;
+
+  level = new Object();
+
+  grass = require('./terrain/grass');
+
+  lava = require('./terrain/lava');
+
+  dirt = require('./terrain/dirt');
+
+  wall = require('./terrain/wall');
+
+  thorns = require('./terrain/thorns');
+
+  level.createTerrain = function() {
+    var i, j, newSquare, row, _i, _j, _ref, _ref1, _results;
+    this.terrain = [];
+    _results = [];
+    for (i = _i = 0, _ref = this.grid.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      row = [];
+      for (j = _j = 0, _ref1 = this.grid[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
+        newSquare = (function() {
+          switch (this.grid[i][j]) {
+            case '1':
+              return object(grass);
+            case '2':
+              return object(dirt);
+            case '3':
+              return object(wall);
+            case '4':
+              return object(thorns);
+            case '5':
+              return object(lava);
+          }
+        }).call(this);
+        newSquare.row = i;
+        newSquare.column = j;
+        row.push(newSquare);
+      }
+      _results.push(this.terrain.push(row));
+    }
+    return _results;
+  };
+
+  level.draw = function(offset) {
+    var column, row, _i, _ref, _results;
+    if (offset == null) {
+      offset = 0;
+    }
+    _results = [];
+    for (row = _i = 0, _ref = this.terrain.length; 0 <= _ref ? _i < _ref : _i > _ref; row = 0 <= _ref ? ++_i : --_i) {
+      _results.push((function() {
+        var _j, _ref1, _results1;
+        _results1 = [];
+        for (column = _j = 0, _ref1 = this.terrain[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; column = 0 <= _ref1 ? ++_j : --_j) {
+          _results1.push(this.terrain[row][column].draw(offset));
+        }
+        return _results1;
+      }).call(this));
+    }
+    return _results;
+  };
+
+  level.columnWidth = 50;
+
+  level.rowHeight = 50;
+
+  level.interactWith = function(entity) {
+    var column, row, square, squaresOccupied, _i, _len, _ref, _results;
+    column = Math.floor(entity.x / this.columnWidth);
+    row = Math.floor(entity.y / this.rowHeight);
+    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
+    _results = [];
+    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
+      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
+      square = this.terrain[row][column];
+      entity.knockback({
+        x: column * this.rowHeight,
+        y: row * this.columnWidth
+      }, square.bounciness);
+      _results.push(entity.hp -= square.damage);
+    }
+    return _results;
+  };
+
+  module.exports = level;
 
 }).call(this);
 
@@ -852,93 +1064,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = game;
-
-}).call(this);
-
-});
-
-require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, terrainTypes;
-
-  level = new Object();
-
-  terrainTypes = {
-    1: {
-      color: '#68432a',
-      bounciness: 0,
-      damage: 0
-    },
-    2: {
-      color: '#126822',
-      bounciness: 0,
-      damage: 0
-    },
-    3: {
-      color: '#FF0',
-      bounciness: 2,
-      damage: 10
-    },
-    4: {
-      color: '#555',
-      bounciness: 0.2,
-      damage: 0
-    },
-    5: {
-      color: '#F00',
-      bounciness: 0,
-      damage: 1
-    }
-  };
-
-  level.columnWidth = 50;
-
-  level.rowHeight = 50;
-
-  level.draw = function(offset) {
-    var column, row, _i, _results;
-    if (offset == null) {
-      offset = 0;
-    }
-    _results = [];
-    for (row = _i = 0; _i < 12; row = ++_i) {
-      _results.push((function() {
-        var _j, _results1;
-        _results1 = [];
-        for (column = _j = 0; _j < 16; column = ++_j) {
-          _results1.push(this.drawSquare(row, column, offset));
-        }
-        return _results1;
-      }).call(this));
-    }
-    return _results;
-  };
-
-  level.drawSquare = function(row, column, offset) {
-    var square;
-    square = this.grid[row][column];
-    ctx.fillStyle = terrainTypes[square].color;
-    return ctx.fillRect(column * this.columnWidth + offset, row * this.rowHeight, this.columnWidth, this.rowHeight);
-  };
-
-  level.interactWith = function(entity) {
-    var column, row, squaresOccupied, terrain, _i, _len, _ref, _results;
-    column = Math.floor(entity.x / this.columnWidth);
-    row = Math.floor(entity.y / this.rowHeight);
-    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
-    _results = [];
-    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
-      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
-      terrain = terrainTypes[this.grid[row][column]];
-      entity.knockback({
-        x: column * this.rowHeight,
-        y: row * this.columnWidth
-      }, terrain.bounciness);
-      _results.push(entity.hp -= terrain.damage);
-    }
-    return _results;
-  };
-
-  module.exports = level;
 
 }).call(this);
 

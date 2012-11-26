@@ -1,43 +1,36 @@
 level = new Object()
+grass = require('./terrain/grass')
+lava = require('./terrain/lava')
+dirt = require('./terrain/dirt')
+wall = require('./terrain/wall')
+thorns = require('./terrain/thorns')
 
-terrainTypes =
-    1: { #grass
-      color: '#68432a',
-      bounciness: 0,
-      damage: 0
-    },
-    2: { #dirt
-      color: '#126822',
-      bounciness: 0,
-      damage: 0
-    },
-    3: { #thorns/shock
-      color: '#FF0',
-      bounciness: 2,
-      damage: 10
-    },
-    4: { #wall/bush
-      color: '#555',
-      bounciness: 0.2,
-      damage: 0
-    },
-    5: { #lava
-      color: '#F00',
-      bounciness: 0,
-      damage: 1
-    }
-level.columnWidth = 50
-level.rowHeight = 50
+
+#ok, test this out using jasmine
+level.createTerrain = ->
+
+  @terrain = []
+  for i in [0...@grid.length]
+    row = []
+    for j in [0...@grid[0].length]
+      newSquare = switch @grid[i][j]
+        when '1' then object(grass)
+        when '2' then object(dirt)
+        when '3' then object(wall)
+        when '4' then object(thorns)
+        when '5' then object(lava)
+      newSquare.row = i
+      newSquare.column = j
+      row.push(newSquare)
+    @terrain.push(row)
 
 level.draw = (offset = 0) ->
-  for row in [0...12]
-    for column in [0...16]
-      @drawSquare(row, column, offset)
+  for row in [0...@terrain.length]
+    for column in [0...@terrain[0].length]
+      @terrain[row][column].draw(offset)
 
-level.drawSquare = (row, column, offset) ->
-  square = @grid[row][column]
-  ctx.fillStyle = terrainTypes[square].color
-  ctx.fillRect(column*@columnWidth + offset, row*@rowHeight, @columnWidth, @rowHeight)
+level.columnWidth = 50
+level.rowHeight = 50
 
 level.interactWith = (entity) ->
   column = Math.floor(entity.x/@columnWidth)
@@ -49,9 +42,9 @@ level.interactWith = (entity) ->
                     ]
 
   for [row, column] in squaresOccupied
-    terrain = terrainTypes[@grid[row][column]]
-    entity.knockback({x: column*@rowHeight, y: row*@columnWidth}, terrain.bounciness)
-    entity.hp -= terrain.damage
+    square = @terrain[row][column]
+    entity.knockback({x: column*@rowHeight, y: row*@columnWidth}, square.bounciness)
+    entity.hp -= square.damage
 
 
 module.exports = level
