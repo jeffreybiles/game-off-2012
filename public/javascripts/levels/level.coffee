@@ -1,20 +1,30 @@
 level = new Object()
 
 terrainTypes =
-    1: {
+    1: { #grass
       color: '#68432a',
       bounciness: 0,
       damage: 0
     },
-    2: {
+    2: { #dirt
       color: '#126822',
       bounciness: 0,
       damage: 0
     },
-    3: {
+    3: { #thorns/shock
       color: '#FF0',
       bounciness: 1,
       damage: 10
+    },
+    4: { #wall/bush
+      color: '#555',
+      bounciness: 0.2,
+      damage: 0
+    },
+    5: { #lava
+      color: '#F00',
+      bounciness: 0,
+      damage: 1
     }
 level.columnWidth = 50
 level.rowHeight = 50

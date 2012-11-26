@@ -596,16 +596,89 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
-require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl1;
+require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity;
 
-  level = require('./level');
+  entity = new Object();
 
-  lvl1 = object(level);
+  entity.x = 0;
 
-  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 3, 3, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]];
+  entity.y = 0;
 
-  module.exports = lvl1;
+  entity.dx = 0;
+
+  entity.dy = 0;
+
+  entity.acceleration = 0.3;
+
+  entity.deceleration = 0.9;
+
+  entity.height = 50;
+
+  entity.width = 50;
+
+  entity.bounciness = 0.2;
+
+  entity.color = 'black';
+
+  entity.direction = 0;
+
+  entity.update = function() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.dx *= this.deceleration;
+    this.dy *= this.deceleration;
+    return this.stayInBounds();
+  };
+
+  entity.stayInBounds = function() {
+    var totalBounce;
+    totalBounce = 10 * this.bounciness;
+    if (this.x < game.leftEdge) {
+      this.dx += totalBounce;
+    }
+    if (this.x + this.width > game.rightEdge) {
+      this.dx -= totalBounce;
+    }
+    if (this.y < game.topEdge) {
+      this.dy += totalBounce;
+    }
+    if (this.y + this.height > game.bottomEdge) {
+      return this.dy -= totalBounce;
+    }
+  };
+
+  entity.knockback = function(collider, extraBouncy) {
+    if (extraBouncy == null) {
+      extraBouncy = 1;
+    }
+    if (extraBouncy > 0) {
+      console.log(this.x, collider.x, this.y, collider.y, this.bounciness, extraBouncy);
+    }
+    this.dx += (this.x - collider.x) * this.bounciness * extraBouncy;
+    return this.dy += (this.y - collider.y) * this.bounciness * extraBouncy;
+  };
+
+  entity.checkCollisions = function(colliders) {
+    var collider, _i, _len, _ref, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
+      collider = colliders[_i];
+      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
+        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
+          this.hit(collider);
+          _results.push(collider.hit(this));
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  module.exports = entity;
 
 }).call(this);
 
@@ -631,6 +704,16 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
       color: '#FF0',
       bounciness: 1,
       damage: 10
+    },
+    4: {
+      color: '#555',
+      bounciness: 0.2,
+      damage: 0
+    },
+    5: {
+      color: '#F00',
+      bounciness: 0,
+      damage: 1
     }
   };
 
@@ -680,6 +763,23 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
   };
 
   module.exports = level;
+
+}).call(this);
+
+});
+
+require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl1;
+
+  level = require('./level');
+
+  lvl1 = object(level);
+
+  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 3, 3, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 4, 4, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 4, 4, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 5, 5, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]];
+
+  lvl1.numEnemies = 3;
+
+  module.exports = lvl1;
 
 }).call(this);
 
@@ -765,100 +865,12 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     this.player = object(playerPrototype);
     this.level = eval("lvl" + this.currentLevel);
     this.enemies = [];
-    enemyFactory(4);
+    enemyFactory(this.level.numEnemies);
     this.latestEnemy = this.enemies[0];
     return this.mainLoop();
   };
 
   module.exports = game;
-
-}).call(this);
-
-});
-
-require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity;
-
-  entity = new Object();
-
-  entity.x = 0;
-
-  entity.y = 0;
-
-  entity.dx = 0;
-
-  entity.dy = 0;
-
-  entity.acceleration = 0.3;
-
-  entity.deceleration = 0.9;
-
-  entity.height = 50;
-
-  entity.width = 50;
-
-  entity.bounciness = 0.2;
-
-  entity.color = 'black';
-
-  entity.direction = 0;
-
-  entity.update = function() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.dx *= this.deceleration;
-    this.dy *= this.deceleration;
-    return this.stayInBounds();
-  };
-
-  entity.stayInBounds = function() {
-    var totalBounce;
-    totalBounce = 10 * this.bounciness;
-    if (this.x < game.leftEdge) {
-      this.dx += totalBounce;
-    }
-    if (this.x + this.width > game.rightEdge) {
-      this.dx -= totalBounce;
-    }
-    if (this.y < game.topEdge) {
-      this.dy += totalBounce;
-    }
-    if (this.y + this.height > game.bottomEdge) {
-      return this.dy -= totalBounce;
-    }
-  };
-
-  entity.knockback = function(collider, extraBouncy) {
-    if (extraBouncy == null) {
-      extraBouncy = 1;
-    }
-    if (extraBouncy > 0) {
-      console.log(this.x, collider.x, this.y, collider.y, this.bounciness, extraBouncy);
-    }
-    this.dx += (this.x - collider.x) * this.bounciness * extraBouncy;
-    return this.dy += (this.y - collider.y) * this.bounciness * extraBouncy;
-  };
-
-  entity.checkCollisions = function(colliders) {
-    var collider, _i, _len, _ref, _ref1, _results;
-    _results = [];
-    for (_i = 0, _len = colliders.length; _i < _len; _i++) {
-      collider = colliders[_i];
-      if ((this.x + this.width > (_ref = collider.x) && _ref > this.x - collider.width)) {
-        if ((this.y + this.height > (_ref1 = collider.y) && _ref1 > this.y - collider.height)) {
-          this.hit(collider);
-          _results.push(collider.hit(this));
-        } else {
-          _results.push(void 0);
-        }
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  module.exports = entity;
 
 }).call(this);
 

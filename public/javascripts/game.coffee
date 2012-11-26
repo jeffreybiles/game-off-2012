@@ -49,7 +49,7 @@ game.start = ->
   @player = object(playerPrototype)
   @level = eval("lvl#{@currentLevel}")
   @enemies = []
-  enemyFactory(4)
+  enemyFactory(@level.numEnemies)
   @latestEnemy = @enemies[0]
   @mainLoop()
 
