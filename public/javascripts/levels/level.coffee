@@ -13,7 +13,7 @@ terrainTypes =
     },
     3: { #thorns/shock
       color: '#FF0',
-      bounciness: 1,
+      bounciness: 2,
       damage: 10
     },
     4: { #wall/bush
