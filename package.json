@@ -1,6 +1,6 @@
 {
   "name": "gameoff",
-  "version": "0.0.1-13",
+  "version": "0.0.1-14",
   "private": false,
   "scripts": {
     "start": "coffee server.coffee"
@@ -10,7 +10,8 @@
     "jade": "*",
     "stylus": "*",
     "coffee-script": "~1.4.0",
-    "browserify": "~1.16.4"
+    "browserify": "~1.16.4",
+    "underscore": "~1.4.2"
   },
   "devDependencies": {
     "node-dev": "~0.2.8"
