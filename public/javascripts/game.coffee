@@ -78,6 +78,7 @@ game.drawArrow = (y) ->
   ctx.lineTo(x, y + height)
   ctx.closePath()
   ctx.fill()
+
 game.loadLevel = ->
   @level = eval("lvl#{@currentLevel}")
   @enemies = []

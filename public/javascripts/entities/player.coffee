@@ -1,7 +1,7 @@
 entity = require('./entity')
 player = object(entity)
 
-player.x = canvas.width/2
+player.x = 50
 player.y = canvas.height/2
 player.hp = 50
 player.type = 'player'
