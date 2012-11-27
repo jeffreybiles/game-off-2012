@@ -29,15 +29,15 @@ terrainTypes =
 level.columnWidth = 50
 level.rowHeight = 50
 
-level.draw = (offset = 0) ->
+level.draw = ->
   for row in [0...12]
     for column in [0...16]
-      @drawSquare(row, column, offset)
+      @drawSquare(row, column)
 
-level.drawSquare = (row, column, offset) ->
+level.drawSquare = (row, column) ->
   square = @grid[row][column]
   ctx.fillStyle = terrainTypes[square].color
-  ctx.fillRect(column*@columnWidth + offset, row*@rowHeight, @columnWidth, @rowHeight)
+  ctx.fillRect(column*@columnWidth, row*@rowHeight, @columnWidth, @rowHeight)
 
 #This mess of a function creates a second map that will be useful in
 #1) making collision detection more efficient, and

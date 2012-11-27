@@ -691,6 +691,127 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
+<<<<<<< HEAD
+=======
+require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl1;
+
+  level = require('./level');
+
+  lvl1 = object(level);
+
+  lvl1.grid = [[1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 3, 3, 1], [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1], [2, 4, 4, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], [2, 4, 4, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2], [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2], [2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2], [1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2], [1, 5, 5, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2], [2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 3, 3, 2], [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]];
+
+  lvl1.numEnemies = 3;
+
+  module.exports = lvl1;
+
+}).call(this);
+
+});
+
+require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, terrainTypes;
+
+  level = new Object();
+
+  terrainTypes = {
+    1: {
+      color: '#68432a',
+      bounciness: 0,
+      damage: 0
+    },
+    2: {
+      color: '#126822',
+      bounciness: 0,
+      damage: 0
+    },
+    3: {
+      color: '#FF0',
+      bounciness: 2,
+      damage: 10
+    },
+    4: {
+      color: '#555',
+      bounciness: 0.2,
+      damage: 0
+    },
+    5: {
+      color: '#F00',
+      bounciness: 0,
+      damage: 1
+    }
+  };
+
+  level.columnWidth = 50;
+
+  level.rowHeight = 50;
+
+  level.draw = function() {
+    var column, row, _i, _results;
+    _results = [];
+    for (row = _i = 0; _i < 12; row = ++_i) {
+      _results.push((function() {
+        var _j, _results1;
+        _results1 = [];
+        for (column = _j = 0; _j < 16; column = ++_j) {
+          _results1.push(this.drawSquare(row, column));
+        }
+        return _results1;
+      }).call(this));
+    }
+    return _results;
+  };
+
+  level.drawSquare = function(row, column) {
+    var square;
+    square = this.grid[row][column];
+    ctx.fillStyle = terrainTypes[square].color;
+    return ctx.fillRect(column * this.columnWidth, row * this.rowHeight, this.columnWidth, this.rowHeight);
+  };
+
+  level.interactWith = function(entity) {
+    var column, row, squaresOccupied, terrain, _i, _len, _ref, _results;
+    column = Math.floor(entity.x / this.columnWidth);
+    row = Math.floor(entity.y / this.rowHeight);
+    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
+    _results = [];
+    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
+      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
+      terrain = terrainTypes[this.grid[row][column]];
+      entity.knockback({
+        x: column * this.rowHeight,
+        y: row * this.columnWidth
+      }, terrain.bounciness);
+      _results.push(entity.hp -= terrain.damage);
+    }
+    return _results;
+  };
+
+  module.exports = level;
+
+}).call(this);
+
+});
+
+require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl2;
+
+  level = require('./level');
+
+  lvl2 = object(level);
+
+  lvl2.grid = [[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2], [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2]];
+
+  lvl2.numEnemies = 3;
+
+  module.exports = lvl2;
+
+}).call(this);
+
+});
+
+>>>>>>> parent of 7bfae9e... level sliding COMPLETE!
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var game, lvl1, lvl2;
 
@@ -725,14 +846,13 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
       this.currentLevel += 1;
       oldLevel = this.level;
       this.loadLevel();
-      this.slideLevel(oldLevel, this.level);
+      this.mainLoop();
     } else {
       window.requestAnimationFrame(function() {
         return _this.mainLoop();
       });
     }
-    this.level.draw(0);
-    this.drawHUD();
+    this.drawBackground();
     this.player.checkCollisions(this.enemies);
     this.player.update();
     this.player.control();
@@ -766,25 +886,8 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
     }).call(this);
   };
 
-  game.slideLevel = function(oldLevel, newLevel, i) {
-    var _this = this;
-    if (i == null) {
-      i = 0;
-    }
-    if (i <= -800) {
-      this.player.x = 50;
-      return this.mainLoop();
-    } else {
-      log(oldLevel, newLevel, i);
-      oldLevel.draw(i);
-      newLevel.draw(800 + i);
-      return setTimeout(function() {
-        return _this.slideLevel(oldLevel, newLevel, i - 5);
-      }, 0.5);
-    }
-  };
-
-  game.drawHUD = function() {
+  game.drawBackground = function() {
+    this.level.draw();
     ctx.fillStyle = 'red';
     ctx.fillRect(10, 10, game.player.hp + 10, 10);
     if (this.latestEnemy) {
@@ -830,6 +933,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
+<<<<<<< HEAD
 require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, terrainTypes;
 
@@ -990,6 +1094,8 @@ require.define("/levels/1.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
+=======
+>>>>>>> parent of 7bfae9e... level sliding COMPLETE!
 require.define("/entry.js",function(require,module,exports,__dirname,__filename,process,global){window.onload = function(){
   require('./lib/animationFrame')
   require('./lib/helper')
