@@ -11,6 +11,7 @@ game.currentLevel = 1
 
 lvl1 = require('./levels/1')
 lvl2 = require('./levels/2')
+lvl3 = require('./levels/3')
 game.level = eval("lvl#{game.currentLevel}")
 
 game.mainLoop = ->
