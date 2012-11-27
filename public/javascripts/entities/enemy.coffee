@@ -1,16 +1,19 @@
 enemy = object(require('./player'))
 enemy.type = 'enemy'
-enemy.seeking = 0.4
+enemy.seeking = 0.3
 enemy.randomness = 1
 enemy.caution = 1
 enemy.lightness = 2
+enemy.damage = 10
+
+enemy.color = '#980'
 
 enemy.hit = (hitter) ->
   @hurt(hitter)
   @knockback(hitter)
 
 enemy.hurt = (hitter) ->
-  hitter.hp -= 10
+  hitter.hp -= @damage
 
 enemy.randomizePosition = ->
   @x = Math.random()*canvas.width
