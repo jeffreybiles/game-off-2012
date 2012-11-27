@@ -1260,7 +1260,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.bottomEdge = canvas.height;
 
-  game.currentLevel = 7;
+  game.currentLevel = 1;
 
   lvl1 = require('./levels/1');
 
