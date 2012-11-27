@@ -3,7 +3,7 @@ player = object(entity)
 
 player.x = 50
 player.y = canvas.height/2
-player.hp = 50
+player.hp = 100
 player.type = 'player'
 player.slashing = false
 

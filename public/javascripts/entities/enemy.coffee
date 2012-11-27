@@ -5,6 +5,9 @@ enemy.randomness = 1
 enemy.caution = 1
 enemy.lightness = 2
 enemy.damage = 10
+enemy.x = 700
+enemy.y = 275
+enemy.hp = 50
 
 enemy.color = '#980'
 

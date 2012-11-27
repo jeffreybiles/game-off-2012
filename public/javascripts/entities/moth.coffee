@@ -7,5 +7,5 @@ moth.randomness = 2
 moth.seeking = 0.5
 moth.hp = 20
 moth.color = '9F9'
-moth.damage = 3
+moth.damage = 5
 module.exports = moth
