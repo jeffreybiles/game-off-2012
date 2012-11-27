@@ -7,7 +7,7 @@ game.leftEdge = 0
 game.rightEdge = canvas.width
 game.topEdge = 0
 game.bottomEdge = canvas.height
-game.currentLevel = 1
+game.currentLevel = 16
 
 lvl1 = require('./levels/1')
 lvl2 = require('./levels/2')
@@ -18,6 +18,13 @@ lvl6 = require('./levels/6')
 lvl7 = require('./levels/7')
 lvl8 = require('./levels/8')
 lvl9 = require('./levels/9')
+lvl10 = require('./levels/10')
+lvl11 = require('./levels/11')
+lvl12 = require('./levels/12')
+lvl13 = require('./levels/13')
+lvl14 = require('./levels/14')
+lvl15 = require('./levels/15')
+lvl16 = require('./levels/16')
 game.level = eval("lvl#{game.currentLevel}")
 
 game.mainLoop = ->

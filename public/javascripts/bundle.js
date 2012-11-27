@@ -469,6 +469,77 @@ require.define("/init.js",function(require,module,exports,__dirname,__filename,p
 })()
 });
 
+require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, player;
+
+  entity = require('./entity');
+
+  player = object(entity);
+
+  player.x = 50;
+
+  player.y = canvas.height / 2;
+
+  player.hp = 100;
+
+  player.type = 'player';
+
+  player.slashing = false;
+
+  player.draw = function() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    if (this.slashing) {
+      ctx.fillStyle = 'red';
+      return ctx.fillRect(this.sword.x, this.sword.y, this.sword.width, this.sword.height);
+    }
+  };
+
+  player.control = function() {
+    if (this.kup) {
+      this.dy -= this.acceleration;
+      this.direction = Math.PI / 2;
+    }
+    if (this.kdown) {
+      this.dy += this.acceleration;
+      this.direction = Math.PI * 3 / 2;
+    }
+    if (this.kleft) {
+      this.dx -= this.acceleration;
+      this.direction = Math.PI;
+    }
+    if (this.kright) {
+      this.dx += this.acceleration;
+      return this.direction = 0;
+    }
+  };
+
+  player.hit = function(collider) {
+    this.knockback(collider);
+    return log(this.x, this.y);
+  };
+
+  player.slash = function() {
+    var sword,
+      _this = this;
+    if (!this.slashing) {
+      sword = object(swordPrototype);
+      sword.place(this.x, this.y, this.width, this.height, this.direction);
+      sword.checkCollisions(game.enemies);
+      this.sword = sword;
+      this.slashing = true;
+      return setTimeout((function() {
+        return _this.slashing = false;
+      }), 250);
+    }
+  };
+
+  module.exports = player;
+
+}).call(this);
+
+});
+
 require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var entity;
 
@@ -552,6 +623,121 @@ require.define("/entities/entity.coffee",function(require,module,exports,__dirna
   };
 
   module.exports = entity;
+
+}).call(this);
+
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.lightness = 2;
+
+  enemy.damage = 10;
+
+  enemy.x = 700;
+
+  enemy.y = 275;
+
+  enemy.hp = 50;
+
+  enemy.color = '#980';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= this.damage;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    this.changeDirection(level, player);
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    xDistance = player.x - this.x;
+    yDistance = player.y - this.y;
+    if (player.pulling) {
+      if (xDistance > 0) {
+        this.x += this.lightness;
+      }
+      if (xDistance < 0) {
+        this.x -= this.lightness;
+      }
+      if (yDistance > 0) {
+        this.y += this.lightness;
+      }
+      if (yDistance < 0) {
+        this.y -= this.lightness;
+      }
+    }
+    if (Math.random() > 0.9) {
+      row = Math.floor(this.y / 50);
+      column = Math.floor(this.x / 50);
+      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+      if (xDistance > 0 && rightOpen) {
+        this.dx += this.seeking;
+      }
+      if (xDistance < 0 && leftOpen) {
+        this.dx -= this.seeking;
+      }
+      if (yDistance > 0 && bottomOpen) {
+        this.dy += this.seeking;
+      }
+      if (yDistance < 0 && topOpen) {
+        this.dy -= this.seeking;
+      }
+      if (bottomOpen && Math.random() < 0.4) {
+        this.dy += this.randomness;
+      }
+      if (topOpen && Math.random() < 0.4) {
+        this.dy -= this.randomness;
+      }
+      if (leftOpen && Math.random() < 0.4) {
+        this.dx -= this.randomness;
+      }
+      if (rightOpen && Math.random() < 0.4) {
+        this.dx += this.randomness;
+      }
+      if (!bottomOpen) {
+        this.dy -= this.caution;
+      }
+      if (!topOpen) {
+        this.dy += this.caution;
+      }
+      if (!leftOpen) {
+        this.dx += this.caution;
+      }
+      if (!rightOpen) {
+        return this.dx -= this.caution;
+      }
+    }
+  };
+
+  module.exports = enemy;
 
 }).call(this);
 
@@ -755,6 +941,23 @@ require.define("/levels/terrain/terrain.coffee",function(require,module,exports,
   };
 
   module.exports = terrain;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var lava, terrain;
+
+  terrain = require('./terrain');
+
+  lava = object(terrain);
+
+  lava.color = '#F00';
+
+  lava.damage = 0.7;
+
+  module.exports = lava;
 
 }).call(this);
 
@@ -1046,33 +1249,6 @@ require.define("/levels/8.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
-require.define("/entities/centurion.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var centurion, enemy;
-
-  enemy = require('./enemy');
-
-  centurion = object(enemy);
-
-  centurion.lightness = 0.5;
-
-  centurion.caution = 2;
-
-  centurion.randomness = 0;
-
-  centurion.seeking = 1;
-
-  centurion.hp = 100;
-
-  centurion.color = '333';
-
-  centurion.damage = 20;
-
-  module.exports = centurion;
-
-}).call(this);
-
-});
-
 require.define("/levels/9.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, lvl;
 
@@ -1104,72 +1280,100 @@ require.define("/levels/9.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
-require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity, player;
+require.define("/levels/10.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
 
-  entity = require('./entity');
+  level = require('./level');
 
-  player = object(entity);
+  lvl = object(level);
 
-  player.x = 50;
+  lvl.grid = ['1111111111111111', '1111111111114111', '1111411111111411', '1111111114111111', '1111111111111111', '1111114111111111', '1111111111111111', '1114111111141111', '1111111111111111', '1111114111111111', '1111111111114111', '1111111111111111'];
 
-  player.y = canvas.height / 2;
-
-  player.hp = 100;
-
-  player.type = 'player';
-
-  player.slashing = false;
-
-  player.draw = function() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    if (this.slashing) {
-      ctx.fillStyle = 'red';
-      return ctx.fillRect(this.sword.x, this.sword.y, this.sword.width, this.sword.height);
+  lvl.enemies = [
+    {}, {}, {}, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'centurion'
     }
-  };
+  ];
 
-  player.control = function() {
-    if (this.kup) {
-      this.dy -= this.acceleration;
-      this.direction = Math.PI / 2;
-    }
-    if (this.kdown) {
-      this.dy += this.acceleration;
-      this.direction = Math.PI * 3 / 2;
-    }
-    if (this.kleft) {
-      this.dx -= this.acceleration;
-      this.direction = Math.PI;
-    }
-    if (this.kright) {
-      this.dx += this.acceleration;
-      return this.direction = 0;
-    }
-  };
+  lvl.name = 'minefield';
 
-  player.hit = function(collider) {
-    this.knockback(collider);
-    return log(this.x, this.y);
-  };
+  lvl.createTerrain();
 
-  player.slash = function() {
-    var sword,
-      _this = this;
-    if (!this.slashing) {
-      sword = object(swordPrototype);
-      sword.place(this.x, this.y, this.width, this.height, this.direction);
-      sword.checkCollisions(game.enemies);
-      this.sword = sword;
-      this.slashing = true;
-      return setTimeout((function() {
-        return _this.slashing = false;
-      }), 250);
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/levels/11.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['1111111111111111', '1113331111333111', '1131111111111311', '1131111111111311', '1131111111111311', '1111111111111111', '1111111111111111', '1131111111111311', '1131111111111311', '1131111111111311', '1113331111333111', '1111111111111111'];
+
+  lvl.enemies = [
+    {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {}, {}
+  ];
+
+  lvl.name = 'arena 1';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/levels/12.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['1111111111111115', '1111111111114415', '1111431111111415', '1111111141111115', '1111111111111115', '1111131111111111', '1111111111111111', '1114111111141115', '1111111111111115', '1111114111111115', '1111111111134115', '1111111111111115'];
+
+  lvl.enemies = [
+    {
+      type: 'centurion'
+    }, {
+      type: 'centurion'
+    }, {
+      type: 'centurion'
     }
-  };
+  ];
 
-  module.exports = player;
+  lvl.name = 'pinball';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
 
 }).call(this);
 
@@ -1202,140 +1406,171 @@ require.define("/entities/moth.coffee",function(require,module,exports,__dirname
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
+require.define("/levels/13.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
 
-  enemy = object(require('./player'));
+  level = require('./level');
 
-  enemy.type = 'enemy';
+  lvl = object(level);
 
-  enemy.seeking = 0.3;
+  lvl.grid = ['5555555555555555', '5511111111111155', '5111111111111115', '5111111111111115', '1111111311111111', '1111111553111111', '1111113551111111', '1111111131111111', '5111111111111115', '5111111111111115', '5511111111111155', '5555555555555555'];
 
-  enemy.randomness = 1;
-
-  enemy.caution = 1;
-
-  enemy.lightness = 2;
-
-  enemy.damage = 10;
-
-  enemy.x = 700;
-
-  enemy.y = 275;
-
-  enemy.hp = 50;
-
-  enemy.color = '#980';
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= this.damage;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    this.changeDirection(level, player);
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    xDistance = player.x - this.x;
-    yDistance = player.y - this.y;
-    if (player.pulling) {
-      if (xDistance > 0) {
-        this.x += this.lightness;
-      }
-      if (xDistance < 0) {
-        this.x -= this.lightness;
-      }
-      if (yDistance > 0) {
-        this.y += this.lightness;
-      }
-      if (yDistance < 0) {
-        this.y -= this.lightness;
-      }
+  lvl.enemies = [
+    {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {}, {}, {}, {
+      type: 'centurion'
     }
-    if (Math.random() > 0.9) {
-      row = Math.floor(this.y / 50);
-      column = Math.floor(this.x / 50);
-      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-      if (xDistance > 0 && rightOpen) {
-        this.dx += this.seeking;
-      }
-      if (xDistance < 0 && leftOpen) {
-        this.dx -= this.seeking;
-      }
-      if (yDistance > 0 && bottomOpen) {
-        this.dy += this.seeking;
-      }
-      if (yDistance < 0 && topOpen) {
-        this.dy -= this.seeking;
-      }
-      if (bottomOpen && Math.random() < 0.4) {
-        this.dy += this.randomness;
-      }
-      if (topOpen && Math.random() < 0.4) {
-        this.dy -= this.randomness;
-      }
-      if (leftOpen && Math.random() < 0.4) {
-        this.dx -= this.randomness;
-      }
-      if (rightOpen && Math.random() < 0.4) {
-        this.dx += this.randomness;
-      }
-      if (!bottomOpen) {
-        this.dy -= this.caution;
-      }
-      if (!topOpen) {
-        this.dy += this.caution;
-      }
-      if (!leftOpen) {
-        this.dx += this.caution;
-      }
-      if (!rightOpen) {
-        return this.dx -= this.caution;
-      }
-    }
-  };
+  ];
 
-  module.exports = enemy;
+  lvl.name = 'arena 2';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
 
 }).call(this);
 
 });
 
-require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var lava, terrain;
+require.define("/levels/14.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
 
-  terrain = require('./terrain');
+  level = require('./level');
 
-  lava = object(terrain);
+  lvl = object(level);
 
-  lava.color = '#F00';
+  lvl.grid = ['4111111111111115', '4111114111141115', '4111111111111115', '4444111111411115', '1111411111111115', '1111141111111115', '1111114111111415', '1111111441111145', '4111111111111115', '4111411111111415', '4111111111111111', '4111111111111111'];
 
-  lava.damage = 0.7;
+  lvl.enemies = [
+    {
+      type: 'centurion',
+      y: 200
+    }, {
+      type: 'centurion',
+      y: 200
+    }, {
+      type: 'centurion',
+      y: 200
+    }
+  ];
 
-  module.exports = lava;
+  lvl.name = 'pinWall';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/entities/centurion.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var centurion, enemy;
+
+  enemy = require('./enemy');
+
+  centurion = object(enemy);
+
+  centurion.lightness = 0.1;
+
+  centurion.caution = 2.5;
+
+  centurion.randomness = 0;
+
+  centurion.seeking = 0.5;
+
+  centurion.hp = 100;
+
+  centurion.color = '333';
+
+  centurion.damage = 20;
+
+  centurion.bounciness = 0.3;
+
+  module.exports = centurion;
+
+}).call(this);
+
+});
+
+require.define("/levels/15.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['3113111111111113', '3113111111111113', '3113113114334113', '3113333113113113', '3111111113111111', '3111111113111111', '3111111114333333', '3334111111111113', '3113111111111113', '3114333333334113', '1111111111111113', '1111111111111113'];
+
+  lvl.enemies = [
+    {
+      type: 'moth',
+      x: 300
+    }, {
+      type: 'moth',
+      x: 300
+    }, {
+      type: 'moth',
+      x: 50,
+      y: 100
+    }, {
+      type: 'moth',
+      x: 50,
+      y: 400
+    }, {
+      type: 'moth',
+      x: 50,
+      y: 100
+    }, {
+      type: 'moth',
+      x: 50,
+      y: 400
+    }, {
+      x: 250,
+      y: 530
+    }, {
+      x: 250,
+      y: 10
+    }, {
+      x: 650,
+      y: 530
+    }, {
+      x: 650,
+      y: 10
+    }, {
+      type: 'centurion',
+      x: 650,
+      y: 330
+    }
+  ];
+
+  lvl.name = 'maze';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
 
 }).call(this);
 
 });
 
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, lvl1, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
+  var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
 
   game = new Object();
 
@@ -1351,7 +1586,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.bottomEdge = canvas.height;
 
-  game.currentLevel = 1;
+  game.currentLevel = 16;
 
   lvl1 = require('./levels/1');
 
@@ -1370,6 +1605,20 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   lvl8 = require('./levels/8');
 
   lvl9 = require('./levels/9');
+
+  lvl10 = require('./levels/10');
+
+  lvl11 = require('./levels/11');
+
+  lvl12 = require('./levels/12');
+
+  lvl13 = require('./levels/13');
+
+  lvl14 = require('./levels/14');
+
+  lvl15 = require('./levels/15');
+
+  lvl16 = require('./levels/16');
 
   game.level = eval("lvl" + game.currentLevel);
 
@@ -1513,6 +1762,47 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = game;
+
+}).call(this);
+
+});
+
+require.define("/levels/16.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['5533433443343355', '5411111111111145', '3141111111111413', '4114111111114114', '1111111331111111', '1111111331111111', '1111111331111111', '1111111331111111', '4114111111111114', '3141111111111413', '5411111111111145', '5533433443343355'];
+
+  lvl.enemies = [
+    {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {
+      type: 'moth'
+    }, {}, {}, {}, {
+      type: 'centurion'
+    }
+  ];
+
+  lvl.name = 'arena 3: final brawl';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
 
 }).call(this);
 
