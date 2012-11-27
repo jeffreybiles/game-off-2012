@@ -5,14 +5,14 @@ player.x = 50
 player.y = canvas.height/2
 player.hp = 50
 player.type = 'player'
+player.slashing = false
 
 player.draw = ->
-  ctx.fillStyle = 'black'
+  ctx.fillStyle = @color
   ctx.fillRect(@x,@y,@width,@height)
-  if @sword && @sword.timer > 0
+  if @slashing
     ctx.fillStyle = 'red'
     ctx.fillRect(@sword.x, @sword.y, @sword.width, @sword.height)
-    @sword.timer -= 1
 
 player.control = ->
   if @kup then @dy -= @acceleration; @direction = Math.PI/2
@@ -25,10 +25,13 @@ player.hit = (collider) ->
   log(@x, @y)
 
 player.slash = ->
-  sword = object(swordPrototype)
-  sword.place(@x, @y, @width, @height, @direction)
-  sword.checkCollisions(game.enemies)
-  @sword = sword
+  if !@slashing
+    sword = object(swordPrototype)
+    sword.place(@x, @y, @width, @height, @direction)
+    sword.checkCollisions(game.enemies)
+    @sword = sword
+    @slashing = true
+    setTimeout( (=> @slashing = false), 250)
 
 
 module.exports = player

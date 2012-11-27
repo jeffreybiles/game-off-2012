@@ -7,12 +7,15 @@ game.leftEdge = 0
 game.rightEdge = canvas.width
 game.topEdge = 0
 game.bottomEdge = canvas.height
-game.currentLevel = 1
+game.currentLevel = 7
 
 lvl1 = require('./levels/1')
 lvl2 = require('./levels/2')
 lvl3 = require('./levels/3')
 lvl4 = require('./levels/4')
+lvl5 = require('./levels/5')
+lvl6 = require('./levels/6')
+lvl7 = require('./levels/7')
 game.level = eval("lvl#{game.currentLevel}")
 
 game.mainLoop = ->
@@ -89,8 +92,11 @@ game.loadLevel = ->
 
 game.createEnemies = ->
   enemyPrototype = require('../entities/enemy')
+  mothPrototype = require('../entities/moth')
   for enemy in @level.enemies
-    thisEnemy = object(enemyPrototype)
+    thisEnemy = switch enemy.type
+      when 'moth' then object(mothPrototype)
+      else object(enemyPrototype)
     thisEnemy.x = enemy.x
     thisEnemy.y = enemy.y
     @enemies.push(thisEnemy)

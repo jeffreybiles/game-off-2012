@@ -448,67 +448,25 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
-require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity, player;
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
 
-  entity = require('./entity');
+  playerPrototype = require('./entities/player')
+  enemyPrototype = require('./entities/enemy')
+  swordPrototype = require('./entities/sword')
 
-  player = object(entity);
+  game = require('./game')
 
-  player.x = 50;
+  Mousetrap.bind('space', function(){game.player.slash()})
+  Mousetrap.hold('up', playerPrototype, 'kup')
+  Mousetrap.hold('down', playerPrototype, 'kdown')
+  Mousetrap.hold('left', playerPrototype, 'kleft')
+  Mousetrap.hold('right', playerPrototype, 'kright')
+  Mousetrap.hold('x', playerPrototype, 'pulling')
 
-  player.y = canvas.height / 2;
-
-  player.hp = 50;
-
-  player.type = 'player';
-
-  player.draw = function() {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    if (this.sword && this.sword.timer > 0) {
-      ctx.fillStyle = 'red';
-      ctx.fillRect(this.sword.x, this.sword.y, this.sword.width, this.sword.height);
-      return this.sword.timer -= 1;
-    }
-  };
-
-  player.control = function() {
-    if (this.kup) {
-      this.dy -= this.acceleration;
-      this.direction = Math.PI / 2;
-    }
-    if (this.kdown) {
-      this.dy += this.acceleration;
-      this.direction = Math.PI * 3 / 2;
-    }
-    if (this.kleft) {
-      this.dx -= this.acceleration;
-      this.direction = Math.PI;
-    }
-    if (this.kright) {
-      this.dx += this.acceleration;
-      return this.direction = 0;
-    }
-  };
-
-  player.hit = function(collider) {
-    this.knockback(collider);
-    return log(this.x, this.y);
-  };
-
-  player.slash = function() {
-    var sword;
-    sword = object(swordPrototype);
-    sword.place(this.x, this.y, this.width, this.height, this.direction);
-    sword.checkCollisions(game.enemies);
-    return this.sword = sword;
-  };
-
-  module.exports = player;
-
-}).call(this);
-
+  game.start()
+})()
 });
 
 require.define("/entities/entity.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -934,7 +892,7 @@ require.define("/levels/4.coffee",function(require,module,exports,__dirname,__fi
 
   lvl = object(level);
 
-  lvl.grid = ['1114444444444444', '1114444444444444', '1114444444444444', '1114444441111111', '1114444411222111', '1111111122232222', '2222222221131111', '1114444411111111', '1114444444444444', '1114444444444444', '1114444444444444', '1114444444444444'];
+  lvl.grid = ['1114444444444444', '1114444444444444', '1114444444444444', '1114444411111111', '1114444411222111', '1111111122232222', '2222222221131111', '1114444411111111', '1114444411111111', '1114444444444444', '1114444444444444', '1114444444444444'];
 
   lvl.enemies = [
     {
@@ -952,6 +910,8 @@ require.define("/levels/4.coffee",function(require,module,exports,__dirname,__fi
     }
   ];
 
+  lvl.name = 'narrows';
+
   lvl.createTerrain();
 
   module.exports = lvl;
@@ -960,8 +920,331 @@ require.define("/levels/4.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
+require.define("/levels/5.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['4441111111121111', '4411111111111111', '4111112212111211', '1111112221111111', '1111222222211111', '2222222221122111', '1122222221112111', '1111122211221111', '1111112222111111', '4111111121112111', '4411111111211111', '4441111111111111'];
+
+  lvl.enemies = [
+    {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }
+  ];
+
+  lvl.name = 'moths';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/levels/6.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['1111111111111111', '1111111111111111', '1111111551111111', '1111115555111111', '1111155555511111', '1111555555551111', '1111155555511111', '1111115555111111', '1111111551111111', '1111111111111111', '1111111111111111', '1111111111111111'];
+
+  lvl.enemies = [
+    {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }
+  ];
+
+  lvl.name = 'flame';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/entities/moth.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy, moth;
+
+  enemy = require('./enemy');
+
+  moth = object(enemy);
+
+  moth.lightness = 6;
+
+  moth.caution = 3;
+
+  moth.randomness = 2;
+
+  moth.seeking = 0.5;
+
+  moth.hp = 20;
+
+  moth.color = '9F9';
+
+  moth.damage = 3;
+
+  module.exports = moth;
+
+}).call(this);
+
+});
+
+require.define("/levels/7.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
+
+  level = require('./level');
+
+  lvl = object(level);
+
+  lvl.grid = ['1111111111111111', '1111111111111111', '1111511111151111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111', '1111511111151111', '1111111111111111', '1111111111111111'];
+
+  lvl.enemies = [
+    {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200,
+      type: 'moth'
+    }, {
+      x: 700,
+      y: 200
+    }
+  ];
+
+  lvl.name = 'open battle';
+
+  lvl.createTerrain();
+
+  module.exports = lvl;
+
+}).call(this);
+
+});
+
+require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, player;
+
+  entity = require('./entity');
+
+  player = object(entity);
+
+  player.x = 50;
+
+  player.y = canvas.height / 2;
+
+  player.hp = 50;
+
+  player.type = 'player';
+
+  player.slashing = false;
+
+  player.draw = function() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    if (this.slashing) {
+      ctx.fillStyle = 'red';
+      return ctx.fillRect(this.sword.x, this.sword.y, this.sword.width, this.sword.height);
+    }
+  };
+
+  player.control = function() {
+    if (this.kup) {
+      this.dy -= this.acceleration;
+      this.direction = Math.PI / 2;
+    }
+    if (this.kdown) {
+      this.dy += this.acceleration;
+      this.direction = Math.PI * 3 / 2;
+    }
+    if (this.kleft) {
+      this.dx -= this.acceleration;
+      this.direction = Math.PI;
+    }
+    if (this.kright) {
+      this.dx += this.acceleration;
+      return this.direction = 0;
+    }
+  };
+
+  player.hit = function(collider) {
+    this.knockback(collider);
+    return log(this.x, this.y);
+  };
+
+  player.slash = function() {
+    var sword,
+      _this = this;
+    if (!this.slashing) {
+      sword = object(swordPrototype);
+      sword.place(this.x, this.y, this.width, this.height, this.direction);
+      sword.checkCollisions(game.enemies);
+      this.sword = sword;
+      this.slashing = true;
+      return setTimeout((function() {
+        return _this.slashing = false;
+      }), 250);
+    }
+  };
+
+  module.exports = player;
+
+}).call(this);
+
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.lightness = 2;
+
+  enemy.damage = 10;
+
+  enemy.color = '#980';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= this.damage;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    this.changeDirection(level, player);
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    xDistance = player.x - this.x;
+    yDistance = player.y - this.y;
+    if (player.pulling) {
+      if (xDistance > 0) {
+        this.x += this.lightness;
+      }
+      if (xDistance < 0) {
+        this.x -= this.lightness;
+      }
+      if (yDistance > 0) {
+        this.y += this.lightness;
+      }
+      if (yDistance < 0) {
+        this.y -= this.lightness;
+      }
+    }
+    if (Math.random() > 0.9) {
+      row = Math.floor(this.y / 50);
+      column = Math.floor(this.x / 50);
+      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+      if (xDistance > 0 && rightOpen) {
+        this.dx += this.seeking;
+      }
+      if (xDistance < 0 && leftOpen) {
+        this.dx -= this.seeking;
+      }
+      if (yDistance > 0 && bottomOpen) {
+        this.dy += this.seeking;
+      }
+      if (yDistance < 0 && topOpen) {
+        this.dy -= this.seeking;
+      }
+      if (bottomOpen && Math.random() < 0.4) {
+        this.dy += this.randomness;
+      }
+      if (topOpen && Math.random() < 0.4) {
+        this.dy -= this.randomness;
+      }
+      if (leftOpen && Math.random() < 0.4) {
+        this.dx -= this.randomness;
+      }
+      if (rightOpen && Math.random() < 0.4) {
+        this.dx += this.randomness;
+      }
+      if (!bottomOpen) {
+        this.dy -= this.caution;
+      }
+      if (!topOpen) {
+        this.dy += this.caution;
+      }
+      if (!leftOpen) {
+        this.dx += this.caution;
+      }
+      if (!rightOpen) {
+        return this.dx -= this.caution;
+      }
+    }
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, lvl1, lvl2, lvl3, lvl4;
+  var game, lvl1, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7;
 
   game = new Object();
 
@@ -977,7 +1260,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.bottomEdge = canvas.height;
 
-  game.currentLevel = 1;
+  game.currentLevel = 7;
 
   lvl1 = require('./levels/1');
 
@@ -986,6 +1269,12 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   lvl3 = require('./levels/3');
 
   lvl4 = require('./levels/4');
+
+  lvl5 = require('./levels/5');
+
+  lvl6 = require('./levels/6');
+
+  lvl7 = require('./levels/7');
 
   game.level = eval("lvl" + game.currentLevel);
 
@@ -1093,13 +1382,21 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   game.createEnemies = function() {
-    var enemy, enemyPrototype, thisEnemy, _i, _len, _ref, _results;
+    var enemy, enemyPrototype, mothPrototype, thisEnemy, _i, _len, _ref, _results;
     enemyPrototype = require('../entities/enemy');
+    mothPrototype = require('../entities/moth');
     _ref = this.level.enemies;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       enemy = _ref[_i];
-      thisEnemy = object(enemyPrototype);
+      thisEnemy = (function() {
+        switch (enemy.type) {
+          case 'moth':
+            return object(mothPrototype);
+          default:
+            return object(enemyPrototype);
+        }
+      })();
       thisEnemy.x = enemy.x;
       thisEnemy.y = enemy.y;
       _results.push(this.enemies.push(thisEnemy));
@@ -1114,132 +1411,6 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   module.exports = game;
-
-}).call(this);
-
-});
-
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-
-  playerPrototype = require('./entities/player')
-  enemyPrototype = require('./entities/enemy')
-  swordPrototype = require('./entities/sword')
-
-  game = require('./game')
-
-  Mousetrap.bind('space', function(){game.player.slash()})
-  Mousetrap.hold('up', playerPrototype, 'kup')
-  Mousetrap.hold('down', playerPrototype, 'kdown')
-  Mousetrap.hold('left', playerPrototype, 'kleft')
-  Mousetrap.hold('right', playerPrototype, 'kright')
-  Mousetrap.hold('x', playerPrototype, 'pulling')
-
-  game.start()
-})()
-});
-
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(require('./player'));
-
-  enemy.type = 'enemy';
-
-  enemy.seeking = 0.4;
-
-  enemy.randomness = 1;
-
-  enemy.caution = 1;
-
-  enemy.lightness = 2;
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= 10;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    this.changeDirection(level, player);
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    xDistance = player.x - this.x;
-    yDistance = player.y - this.y;
-    if (player.pulling) {
-      if (xDistance > 0) {
-        this.x += this.lightness;
-      }
-      if (xDistance < 0) {
-        this.x -= this.lightness;
-      }
-      if (yDistance > 0) {
-        this.y += this.lightness;
-      }
-      if (yDistance < 0) {
-        this.y -= this.lightness;
-      }
-    }
-    if (Math.random() > 0.9) {
-      row = Math.floor(this.y / 50);
-      column = Math.floor(this.x / 50);
-      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-      if (xDistance > 0 && rightOpen) {
-        this.dx += this.seeking;
-      }
-      if (xDistance < 0 && leftOpen) {
-        this.dx -= this.seeking;
-      }
-      if (yDistance > 0 && bottomOpen) {
-        this.dy += this.seeking;
-      }
-      if (yDistance < 0 && topOpen) {
-        this.dy -= this.seeking;
-      }
-      if (bottomOpen && Math.random() < 0.4) {
-        this.dy += this.randomness;
-      }
-      if (topOpen && Math.random() < 0.4) {
-        this.dy -= this.randomness;
-      }
-      if (leftOpen && Math.random() < 0.4) {
-        this.dx -= this.randomness;
-      }
-      if (rightOpen && Math.random() < 0.4) {
-        this.dx += this.randomness;
-      }
-      if (!bottomOpen) {
-        this.dy -= this.caution;
-      }
-      if (!topOpen) {
-        this.dy += this.caution;
-      }
-      if (!leftOpen) {
-        this.dx += this.caution;
-      }
-      if (!rightOpen) {
-        return this.dx -= this.caution;
-      }
-    }
-  };
-
-  module.exports = enemy;
 
 }).call(this);
 
