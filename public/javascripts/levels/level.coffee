@@ -5,8 +5,6 @@ dirt = require('./terrain/dirt')
 wall = require('./terrain/wall')
 thorns = require('./terrain/thorns')
 
-
-#ok, test this out using jasmine
 level.createTerrain = ->
   @terrain = []
   for i in [0...@grid.length]

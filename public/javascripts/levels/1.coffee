@@ -16,7 +16,10 @@ lvl1.grid = [
   '1111111111111111',
   ]
 
-lvl1.numEnemies = 1
+lvl1.enemies = [
+  {x: 500, y: 500}
+]
+
 lvl1.createTerrain()
 
 

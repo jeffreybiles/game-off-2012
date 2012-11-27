@@ -7,7 +7,7 @@ game.leftEdge = 0
 game.rightEdge = canvas.width
 game.topEdge = 0
 game.bottomEdge = canvas.height
-game.currentLevel = 1
+game.currentLevel = 3
 
 lvl1 = require('./levels/1')
 lvl2 = require('./levels/2')
@@ -83,8 +83,16 @@ game.drawArrow = (y) ->
 game.loadLevel = ->
   @level = eval("lvl#{@currentLevel}")
   @enemies = []
-  enemyFactory(@level.numEnemies)
+  @createEnemies()
   @latestEnemy = @enemies[0]
+
+game.createEnemies = ->
+  enemyPrototype = require('../entities/enemy')
+  for enemy in @level.enemies
+    thisEnemy = object(enemyPrototype)
+    thisEnemy.x = enemy.x
+    thisEnemy.y = enemy.y
+    @enemies.push(thisEnemy)
 
 game.start = ->
   @player = object(playerPrototype)

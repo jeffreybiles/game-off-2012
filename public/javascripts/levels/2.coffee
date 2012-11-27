@@ -16,7 +16,11 @@ lvl2.grid = [
   '1111111111111111',
   ]
 
-lvl2.numEnemies = 2
+lvl2.enemies = [
+  {x: 10, y: 10},
+  {x: 300, y: 400}
+]
+
 lvl2.createTerrain()
 
 module.exports = lvl2

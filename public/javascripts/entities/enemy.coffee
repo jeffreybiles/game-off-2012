@@ -2,6 +2,7 @@ enemy = object(require('./player'))
 enemy.type = 'enemy'
 enemy.seeking = 0.3
 enemy.randomness = 1
+enemy.caution = 1
 
 enemy.hit = (hitter) ->
   @hurt(hitter)
@@ -48,6 +49,11 @@ enemy.changeDirection = (level, player) ->
     @dx -= @randomness
   if rightOpen and Math.random() < 0.4
     @dx += @randomness
+
+  if !bottomOpen then @dy -= @caution
+  if !topOpen then @dy += @caution
+  if !leftOpen then @dx += @caution
+  if !rightOpen then @dx -= @caution
 
   @dx += (player.x - @x)/800
   @dy += (player.y - @y)/600
