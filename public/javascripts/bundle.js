@@ -486,7 +486,7 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
 
   player = object(entity);
 
-  player.x = canvas.width / 2;
+  player.x = 50;
 
   player.y = canvas.height / 2;
 
@@ -630,6 +630,83 @@ require.define("/entities/entity.coffee",function(require,module,exports,__dirna
 
 });
 
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= 10;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    if (Math.random() > 0.9) {
+      this.changeDirection(level, player);
+    }
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    row = Math.floor(this.y / 50);
+    column = Math.floor(this.x / 50);
+    leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+    rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+    topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+    bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+    xDistance = player.x - this.x;
+    yDistance = player.x - this.y;
+    if (xDistance > 0 && rightOpen) {
+      this.dx += this.seeking;
+    }
+    if (xDistance < 0 && leftOpen) {
+      this.dx -= this.seeking;
+    }
+    if (yDistance > 0 && bottomOpen) {
+      this.dy += this.seeking;
+    }
+    if (yDistance < 0 && topOpen) {
+      this.dy -= this.seeking;
+    }
+    if (bottomOpen && Math.random() < 0.4) {
+      this.dy += this.randomness;
+    }
+    if (topOpen && Math.random() < 0.4) {
+      this.dy -= this.randomness;
+    }
+    if (leftOpen && Math.random() < 0.4) {
+      this.dx -= this.randomness;
+    }
+    if (rightOpen && Math.random() < 0.4) {
+      this.dx += this.randomness;
+    }
+    this.dx += (player.x - this.x) / 800;
+    return this.dy += (player.y - this.y) / 600;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var entity, sword;
 
@@ -652,127 +729,6 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
   };
 
   module.exports = sword;
-
-}).call(this);
-
-});
-
-require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl1;
-
-  level = require('./level');
-
-  lvl1 = object(level);
-
-  lvl1.grid = ['1111111111111111', '1111111111111111', '1111111111111111', '2222222221111111', '1111111121111111', '1111111121111111', '1111111121112222', '1111111122222111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
-
-  lvl1.numEnemies = 1;
-
-  lvl1.createTerrain();
-
-  module.exports = lvl1;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var grass, terrain;
-
-  terrain = require('./terrain');
-
-  grass = object(terrain);
-
-  grass.color = '#68432a';
-
-  module.exports = grass;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var lava, terrain;
-
-  terrain = require('./terrain');
-
-  lava = object(terrain);
-
-  lava.color = '#F00';
-
-  lava.damage = 1;
-
-  module.exports = lava;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/dirt.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var dirt, terrain;
-
-  terrain = require('./terrain');
-
-  dirt = object(terrain);
-
-  dirt.color = '#456';
-
-  module.exports = dirt;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/wall.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var terrain, wall;
-
-  terrain = require('./terrain');
-
-  wall = object(terrain);
-
-  wall.color = '#225';
-
-  wall.bounciness = 0.2;
-
-  module.exports = wall;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/thorns.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var terrain, thorns;
-
-  terrain = require('./terrain');
-
-  thorns = object(terrain);
-
-  thorns.color = '#FF0';
-
-  thorns.bounciness = 2;
-
-  thorns.damage = 10;
-
-  module.exports = thorns;
-
-}).call(this);
-
-});
-
-require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl2;
-
-  level = require('./level');
-
-  lvl2 = object(level);
-
-  lvl2.grid = ['1111111111111111', '1111111111111111', '3333333331111111', '1111111131111111', '1111111131111111', '1111111131111111', '2221111131222222', '1121111131211111', '1121111131211111', '1121111131211111', '1122222222211111', '1111111111111111'];
-
-  lvl2.numEnemies = 3;
-
-  lvl2.createTerrain();
-
-  module.exports = lvl2;
 
 }).call(this);
 
@@ -918,74 +874,20 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
+require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl1;
 
-  enemy = object(require('./player'));
+  level = require('./level');
 
-  enemy.type = 'enemy';
+  lvl1 = object(level);
 
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
+  lvl1.grid = ['1111111111111111', '1111111111111111', '1111111111111111', '2222222221111111', '1111111121111111', '1111111121111111', '1111111121112222', '1111111122222111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
 
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= 10;
-  };
+  lvl1.numEnemies = 1;
 
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
+  lvl1.createTerrain();
 
-  enemy.move = function(level, player) {
-    if (Math.random() > 0.9) {
-      this.changeDirection(level, player);
-    }
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    row = Math.floor(this.y / 50);
-    column = Math.floor(this.x / 50);
-    leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-    rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-    topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-    bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-    xDistance = player.x - this.x;
-    yDistance = player.x - this.y;
-    if (xDistance > 0 && rightOpen) {
-      this.dx += 0.5;
-    }
-    if (xDistance < 0 && leftOpen) {
-      this.dx -= 0.5;
-    }
-    if (yDistance > 0 && bottomOpen) {
-      this.dy += 0.5;
-    }
-    if (yDistance < 0 && topOpen) {
-      this.dy -= 0.5;
-    }
-    if (bottomOpen && Math.random() < 0.4) {
-      this.dy += 2;
-    }
-    if (topOpen && Math.random() < 0.4) {
-      this.dy -= 2;
-    }
-    if (leftOpen && Math.random() < 0.4) {
-      this.dx -= 2;
-    }
-    if (rightOpen && Math.random() < 0.4) {
-      this.dx += 2;
-    }
-    this.dx += (player.x - this.x) / 800;
-    return this.dy += (player.y - this.y) / 600;
-  };
-
-  module.exports = enemy;
+  module.exports = lvl1;
 
 }).call(this);
 
@@ -1091,6 +993,21 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
 
 });
 
+require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var grass, terrain;
+
+  terrain = require('./terrain');
+
+  grass = object(terrain);
+
+  grass.color = '#68432a';
+
+  module.exports = grass;
+
+}).call(this);
+
+});
+
 require.define("/levels/terrain/terrain.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var terrain;
 
@@ -1123,6 +1040,93 @@ require.define("/levels/terrain/terrain.coffee",function(require,module,exports,
   };
 
   module.exports = terrain;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var lava, terrain;
+
+  terrain = require('./terrain');
+
+  lava = object(terrain);
+
+  lava.color = '#F00';
+
+  lava.damage = 1;
+
+  module.exports = lava;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/dirt.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var dirt, terrain;
+
+  terrain = require('./terrain');
+
+  dirt = object(terrain);
+
+  dirt.color = '#456';
+
+  module.exports = dirt;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/wall.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, wall;
+
+  terrain = require('./terrain');
+
+  wall = object(terrain);
+
+  wall.color = '#225';
+
+  wall.bounciness = 0.2;
+
+  module.exports = wall;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/thorns.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, thorns;
+
+  terrain = require('./terrain');
+
+  thorns = object(terrain);
+
+  thorns.color = '#FF0';
+
+  thorns.bounciness = 2;
+
+  thorns.damage = 10;
+
+  module.exports = thorns;
+
+}).call(this);
+
+});
+
+require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl2;
+
+  level = require('./level');
+
+  lvl2 = object(level);
+
+  lvl2.grid = ['1111111111111111', '1111111111111111', '3333333331111111', '1111111131111111', '1111111131111111', '1111111131111111', '2221111131222222', '1121111131211111', '1121111131211111', '1121111131211111', '1122222222211111', '1111111111111111'];
+
+  lvl2.numEnemies = 2;
+
+  lvl2.createTerrain();
+
+  module.exports = lvl2;
 
 }).call(this);
 
