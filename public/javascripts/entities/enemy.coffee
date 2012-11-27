@@ -1,8 +1,9 @@
 enemy = object(require('./player'))
 enemy.type = 'enemy'
-enemy.seeking = 0.3
+enemy.seeking = 0.4
 enemy.randomness = 1
 enemy.caution = 1
+enemy.lightness = 2
 
 enemy.hit = (hitter) ->
   @hurt(hitter)
@@ -16,46 +17,47 @@ enemy.randomizePosition = ->
   @y = Math.random()*canvas.height
 
 enemy.move = (level, player) ->
-  if Math.random() > 0.9 then @changeDirection(level, player)
+  @changeDirection(level, player)
   @x += @dx
   @y += @dy
 
 enemy.changeDirection = (level, player) ->
-  row = Math.floor(@y/50)
-  column = Math.floor(@x/50)
-  leftOpen = level.squareOpen(row, column - 1) and level.squareOpen(row + 1, column - 1)
-  rightOpen = level.squareOpen(row, column + 2) and level.squareOpen(row + 1, column + 2)
-  topOpen = level.squareOpen(row - 1, column) and level.squareOpen(row - 1, column + 1)
-  bottomOpen = level.squareOpen(row + 2, column) and level.squareOpen(row + 2, column + 1)
 
   xDistance = player.x - @x
-  yDistance = player.x - @y
+  yDistance = player.y - @y
 
+  if player.pulling
+    @x += @lightness if xDistance > 0
+    @x -= @lightness if xDistance < 0
+    @y += @lightness if yDistance > 0
+    @y -= @lightness if yDistance < 0
 
-  if xDistance > 0 and rightOpen
-    @dx += @seeking
-  if xDistance < 0 and leftOpen
-    @dx -= @seeking
-  if yDistance > 0 and bottomOpen
-    @dy += @seeking
-  if yDistance < 0 and topOpen
-    @dy -= @seeking
+  if Math.random() > 0.9
+    row = Math.floor(@y/50)
+    column = Math.floor(@x/50)
+    leftOpen = level.squareOpen(row, column - 1) and level.squareOpen(row + 1, column - 1)
+    rightOpen = level.squareOpen(row, column + 2) and level.squareOpen(row + 1, column + 2)
+    topOpen = level.squareOpen(row - 1, column) and level.squareOpen(row - 1, column + 1)
+    bottomOpen = level.squareOpen(row + 2, column) and level.squareOpen(row + 2, column + 1)
 
-  if bottomOpen and Math.random() < 0.4
-    @dy += @randomness
-  if topOpen and Math.random() < 0.4
-    @dy -= @randomness
-  if leftOpen and Math.random() < 0.4
-    @dx -= @randomness
-  if rightOpen and Math.random() < 0.4
-    @dx += @randomness
+    @dx += @seeking if xDistance > 0 and rightOpen
+    @dx -= @seeking if xDistance < 0 and leftOpen
+    @dy += @seeking if yDistance > 0 and bottomOpen
+    @dy -= @seeking if yDistance < 0 and topOpen
 
-  if !bottomOpen then @dy -= @caution
-  if !topOpen then @dy += @caution
-  if !leftOpen then @dx += @caution
-  if !rightOpen then @dx -= @caution
+    if bottomOpen and Math.random() < 0.4
+      @dy += @randomness
+    if topOpen and Math.random() < 0.4
+      @dy -= @randomness
+    if leftOpen and Math.random() < 0.4
+      @dx -= @randomness
+    if rightOpen and Math.random() < 0.4
+      @dx += @randomness
 
-  @dx += (player.x - @x)/800
-  @dy += (player.y - @y)/600
+    if !bottomOpen then @dy -= @caution
+    if !topOpen then @dy += @caution
+    if !leftOpen then @dx += @caution
+    if !rightOpen then @dx -= @caution
+
 
 module.exports = enemy

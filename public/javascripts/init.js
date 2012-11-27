@@ -13,6 +13,7 @@
   Mousetrap.hold('down', playerPrototype, 'kdown')
   Mousetrap.hold('left', playerPrototype, 'kleft')
   Mousetrap.hold('right', playerPrototype, 'kright')
+  Mousetrap.hold('x', playerPrototype, 'pulling')
 
   game.start()
 })()

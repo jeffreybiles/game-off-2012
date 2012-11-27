@@ -7,7 +7,7 @@ game.leftEdge = 0
 game.rightEdge = canvas.width
 game.topEdge = 0
 game.bottomEdge = canvas.height
-game.currentLevel = 4
+game.currentLevel = 1
 
 lvl1 = require('./levels/1')
 lvl2 = require('./levels/2')

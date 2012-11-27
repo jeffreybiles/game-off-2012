@@ -417,6 +417,19 @@ require.define("/lib/animationFrame.js",function(require,module,exports,__dirnam
 }());
 });
 
+require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  object = function(o){
+    function F(){}
+    F.prototype = o
+    return new F()
+  }
+
+  log = function(){
+    console.log(arguments)
+  }
+})()
+});
+
 require.define("/lib/mousetrap.js",function(require,module,exports,__dirname,__filename,process,global){/* mousetrap v1.2.1 craig.is/killing/mice */
 (function(){function q(a,c,b){a.addEventListener?a.addEventListener(c,b,!1):a.attachEvent("on"+c,b)}function x(a){return"keypress"==a.type?String.fromCharCode(a.which):h[a.which]?h[a.which]:y[a.which]?y[a.which]:String.fromCharCode(a.which).toLowerCase()}function r(a){var a=a||{},c=!1,b;for(b in l)a[b]?c=!0:l[b]=0;c||(n=!1)}function z(a,c,b,d,F){var g,e,f=[],j=b.type;if(!k[a])return[];"keyup"==j&&s(a)&&(c=[a]);for(g=0;g<k[a].length;++g)if(e=k[a][g],!(e.seq&&l[e.seq]!=e.level)&&j==e.action&&("keypress"==
 j&&!b.metaKey&&!b.ctrlKey||c.sort().join(",")===e.modifiers.sort().join(",")))d&&e.combo==F&&k[a].splice(g,1),f.push(e);return f}function t(a,c,b){if(!u.stopCallback(c,c.target||c.srcElement,b)&&!1===a(c,b))c.preventDefault&&c.preventDefault(),c.stopPropagation&&c.stopPropagation(),c.returnValue=!1,c.cancelBubble=!0}function v(a){"number"!==typeof a.which&&(a.which=a.keyCode);var c=x(a);if(c)if("keyup"==a.type&&w==c)w=!1;else{var b=[];a.shiftKey&&b.push("shift");a.altKey&&b.push("alt");a.ctrlKey&&
@@ -433,26 +446,6 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
     Mousetrap.bind(key, function(){obj[prop] = false}, 'keyup')
   }
 })();
-});
-
-require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  canvas = document.getElementById("mainCanvas")
-  ctx = canvas.getContext("2d")
-
-  playerPrototype = require('./entities/player')
-  enemyPrototype = require('./entities/enemy')
-  swordPrototype = require('./entities/sword')
-
-  game = require('./game')
-
-  Mousetrap.bind('space', function(){game.player.slash()})
-  Mousetrap.hold('up', playerPrototype, 'kup')
-  Mousetrap.hold('down', playerPrototype, 'kdown')
-  Mousetrap.hold('left', playerPrototype, 'kleft')
-  Mousetrap.hold('right', playerPrototype, 'kright')
-
-  game.start()
-})()
 });
 
 require.define("/entities/player.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -513,153 +506,6 @@ require.define("/entities/player.coffee",function(require,module,exports,__dirna
   };
 
   module.exports = player;
-
-}).call(this);
-
-});
-
-require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var entity, sword;
-
-  entity = require('./entity');
-
-  sword = object(entity);
-
-  sword.place = function(x, y, width, height, direction) {
-    sword.x = x + Math.cos(direction) * width;
-    sword.y = y - Math.sin(direction) * height;
-    sword.width = width;
-    return sword.height = height;
-  };
-
-  sword.timer = 10;
-
-  sword.hit = function(hit) {
-    hit.hp -= 20;
-    return game.latestEnemy = hit.hp >= 0 ? hit : null;
-  };
-
-  module.exports = sword;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var grass, terrain;
-
-  terrain = require('./terrain');
-
-  grass = object(terrain);
-
-  grass.color = '#68432a';
-
-  module.exports = grass;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/terrain.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var terrain;
-
-  terrain = new Object();
-
-  terrain.width = 50;
-
-  terrain.height = 50;
-
-  terrain.color = '#342564';
-
-  terrain.bounciness = 0;
-
-  terrain.damage = 0;
-
-  terrain.row = 0;
-
-  terrain.column = 0;
-
-  terrain.draw = function(offset) {
-    if (offset == null) {
-      offset = 0;
-    }
-    ctx.fillStyle = this.color;
-    return ctx.fillRect(this.column * this.width + offset, this.row * this.height, this.width, this.height);
-  };
-
-  terrain.passable = function() {
-    return this.bounciness + this.damage === 0;
-  };
-
-  module.exports = terrain;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var lava, terrain;
-
-  terrain = require('./terrain');
-
-  lava = object(terrain);
-
-  lava.color = '#F00';
-
-  lava.damage = 1;
-
-  module.exports = lava;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/dirt.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var dirt, terrain;
-
-  terrain = require('./terrain');
-
-  dirt = object(terrain);
-
-  dirt.color = '#456';
-
-  module.exports = dirt;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/wall.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var terrain, wall;
-
-  terrain = require('./terrain');
-
-  wall = object(terrain);
-
-  wall.color = '#225';
-
-  wall.bounciness = 0.2;
-
-  module.exports = wall;
-
-}).call(this);
-
-});
-
-require.define("/levels/terrain/thorns.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var terrain, thorns;
-
-  terrain = require('./terrain');
-
-  thorns = object(terrain);
-
-  thorns.color = '#FF0';
-
-  thorns.bounciness = 2;
-
-  thorns.damage = 10;
-
-  module.exports = thorns;
 
 }).call(this);
 
@@ -753,17 +599,31 @@ require.define("/entities/entity.coffee",function(require,module,exports,__dirna
 
 });
 
-require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  object = function(o){
-    function F(){}
-    F.prototype = o
-    return new F()
-  }
+require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var entity, sword;
 
-  log = function(){
-    console.log(arguments)
-  }
-})()
+  entity = require('./entity');
+
+  sword = object(entity);
+
+  sword.place = function(x, y, width, height, direction) {
+    sword.x = x + Math.cos(direction) * width;
+    sword.y = y - Math.sin(direction) * height;
+    sword.width = width;
+    return sword.height = height;
+  };
+
+  sword.timer = 10;
+
+  sword.hit = function(hit) {
+    hit.hp -= 20;
+    return game.latestEnemy = hit.hp >= 0 ? hit : null;
+  };
+
+  module.exports = sword;
+
+}).call(this);
+
 });
 
 require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
@@ -890,6 +750,126 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
 
 });
 
+require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var grass, terrain;
+
+  terrain = require('./terrain');
+
+  grass = object(terrain);
+
+  grass.color = '#68432a';
+
+  module.exports = grass;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/terrain.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain;
+
+  terrain = new Object();
+
+  terrain.width = 50;
+
+  terrain.height = 50;
+
+  terrain.color = '#342564';
+
+  terrain.bounciness = 0;
+
+  terrain.damage = 0;
+
+  terrain.row = 0;
+
+  terrain.column = 0;
+
+  terrain.draw = function(offset) {
+    if (offset == null) {
+      offset = 0;
+    }
+    ctx.fillStyle = this.color;
+    return ctx.fillRect(this.column * this.width + offset, this.row * this.height, this.width, this.height);
+  };
+
+  terrain.passable = function() {
+    return this.bounciness + this.damage === 0;
+  };
+
+  module.exports = terrain;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/lava.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var lava, terrain;
+
+  terrain = require('./terrain');
+
+  lava = object(terrain);
+
+  lava.color = '#F00';
+
+  lava.damage = 1;
+
+  module.exports = lava;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/dirt.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var dirt, terrain;
+
+  terrain = require('./terrain');
+
+  dirt = object(terrain);
+
+  dirt.color = '#456';
+
+  module.exports = dirt;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/wall.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, wall;
+
+  terrain = require('./terrain');
+
+  wall = object(terrain);
+
+  wall.color = '#225';
+
+  wall.bounciness = 0.2;
+
+  module.exports = wall;
+
+}).call(this);
+
+});
+
+require.define("/levels/terrain/thorns.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var terrain, thorns;
+
+  terrain = require('./terrain');
+
+  thorns = object(terrain);
+
+  thorns.color = '#FF0';
+
+  thorns.bounciness = 2;
+
+  thorns.damage = 10;
+
+  module.exports = thorns;
+
+}).call(this);
+
+});
+
 require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, lvl2;
 
@@ -947,92 +927,34 @@ require.define("/levels/3.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
+require.define("/levels/4.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
 
-  enemy = object(require('./player'));
+  level = require('./level');
 
-  enemy.type = 'enemy';
+  lvl = object(level);
 
-  enemy.seeking = 0.3;
+  lvl.grid = ['1114444444444444', '1114444444444444', '1114444444444444', '1114444441111111', '1114444411222111', '1111111122232222', '2222222221131111', '1114444411111111', '1114444444444444', '1114444444444444', '1114444444444444', '1114444444444444'];
 
-  enemy.randomness = 1;
+  lvl.enemies = [
+    {
+      x: 280,
+      y: 275
+    }, {
+      x: 700,
+      y: 275
+    }, {
+      x: 600,
+      y: 275
+    }, {
+      x: 500,
+      y: 275
+    }
+  ];
 
-  enemy.caution = 1;
+  lvl.createTerrain();
 
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= 10;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    if (Math.random() > 0.9) {
-      this.changeDirection(level, player);
-    }
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    row = Math.floor(this.y / 50);
-    column = Math.floor(this.x / 50);
-    leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-    rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-    topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-    bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-    xDistance = player.x - this.x;
-    yDistance = player.x - this.y;
-    if (xDistance > 0 && rightOpen) {
-      this.dx += this.seeking;
-    }
-    if (xDistance < 0 && leftOpen) {
-      this.dx -= this.seeking;
-    }
-    if (yDistance > 0 && bottomOpen) {
-      this.dy += this.seeking;
-    }
-    if (yDistance < 0 && topOpen) {
-      this.dy -= this.seeking;
-    }
-    if (bottomOpen && Math.random() < 0.4) {
-      this.dy += this.randomness;
-    }
-    if (topOpen && Math.random() < 0.4) {
-      this.dy -= this.randomness;
-    }
-    if (leftOpen && Math.random() < 0.4) {
-      this.dx -= this.randomness;
-    }
-    if (rightOpen && Math.random() < 0.4) {
-      this.dx += this.randomness;
-    }
-    if (!bottomOpen) {
-      this.dy -= this.caution;
-    }
-    if (!topOpen) {
-      this.dy += this.caution;
-    }
-    if (!leftOpen) {
-      this.dx += this.caution;
-    }
-    if (!rightOpen) {
-      this.dx -= this.caution;
-    }
-    this.dx += (player.x - this.x) / 800;
-    return this.dy += (player.y - this.y) / 600;
-  };
-
-  module.exports = enemy;
+  module.exports = lvl;
 
 }).call(this);
 
@@ -1055,7 +977,7 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.bottomEdge = canvas.height;
 
-  game.currentLevel = 4;
+  game.currentLevel = 1;
 
   lvl1 = require('./levels/1');
 
@@ -1197,34 +1119,127 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
-require.define("/levels/4.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl;
+require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  canvas = document.getElementById("mainCanvas")
+  ctx = canvas.getContext("2d")
 
-  level = require('./level');
+  playerPrototype = require('./entities/player')
+  enemyPrototype = require('./entities/enemy')
+  swordPrototype = require('./entities/sword')
 
-  lvl = object(level);
+  game = require('./game')
 
-  lvl.grid = ['1114444444444444', '1114444444444444', '1114444444444444', '1114444441111111', '1114444411222111', '1111111122232222', '2222222221131111', '1114444411111111', '1114444444444444', '1114444444444444', '1114444444444444', '1114444444444444'];
+  Mousetrap.bind('space', function(){game.player.slash()})
+  Mousetrap.hold('up', playerPrototype, 'kup')
+  Mousetrap.hold('down', playerPrototype, 'kdown')
+  Mousetrap.hold('left', playerPrototype, 'kleft')
+  Mousetrap.hold('right', playerPrototype, 'kright')
+  Mousetrap.hold('x', playerPrototype, 'pulling')
 
-  lvl.enemies = [
-    {
-      x: 280,
-      y: 275
-    }, {
-      x: 700,
-      y: 275
-    }, {
-      x: 600,
-      y: 275
-    }, {
-      x: 500,
-      y: 275
+  game.start()
+})()
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.4;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.lightness = 2;
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= 10;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    this.changeDirection(level, player);
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    xDistance = player.x - this.x;
+    yDistance = player.y - this.y;
+    if (player.pulling) {
+      if (xDistance > 0) {
+        this.x += this.lightness;
+      }
+      if (xDistance < 0) {
+        this.x -= this.lightness;
+      }
+      if (yDistance > 0) {
+        this.y += this.lightness;
+      }
+      if (yDistance < 0) {
+        this.y -= this.lightness;
+      }
     }
-  ];
+    if (Math.random() > 0.9) {
+      row = Math.floor(this.y / 50);
+      column = Math.floor(this.x / 50);
+      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+      if (xDistance > 0 && rightOpen) {
+        this.dx += this.seeking;
+      }
+      if (xDistance < 0 && leftOpen) {
+        this.dx -= this.seeking;
+      }
+      if (yDistance > 0 && bottomOpen) {
+        this.dy += this.seeking;
+      }
+      if (yDistance < 0 && topOpen) {
+        this.dy -= this.seeking;
+      }
+      if (bottomOpen && Math.random() < 0.4) {
+        this.dy += this.randomness;
+      }
+      if (topOpen && Math.random() < 0.4) {
+        this.dy -= this.randomness;
+      }
+      if (leftOpen && Math.random() < 0.4) {
+        this.dx -= this.randomness;
+      }
+      if (rightOpen && Math.random() < 0.4) {
+        this.dx += this.randomness;
+      }
+      if (!bottomOpen) {
+        this.dy -= this.caution;
+      }
+      if (!topOpen) {
+        this.dy += this.caution;
+      }
+      if (!leftOpen) {
+        this.dx += this.caution;
+      }
+      if (!rightOpen) {
+        return this.dx -= this.caution;
+      }
+    }
+  };
 
-  lvl.createTerrain();
-
-  module.exports = lvl;
+  module.exports = enemy;
 
 }).call(this);
 
