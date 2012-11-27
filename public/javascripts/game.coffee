@@ -20,14 +20,13 @@ game.mainLoop = ->
     @currentLevel += 1
     oldLevel = @level
     @loadLevel()
-    @mainLoop() #TODO: this will be replaced with
-    #a changeLevel function that will take the old level
-    #and slide it to the left so that the player is now on the left side of the srcreen
+    @slideLevel(oldLevel, @level)
   else
     window.requestAnimationFrame =>
       @mainLoop()
 
-  @drawBackground()
+  @level.draw(0)
+  @drawHUD()
   @player.checkCollisions(@enemies)
   @player.update()
   @player.control()
@@ -44,9 +43,20 @@ game.mainLoop = ->
 game.cleanDeadEnemies = ->
   @enemies = (enemy for enemy in @enemies when enemy.hp > 0)
 
+game.slideLevel = (oldLevel, newLevel, i = 0) ->
+  if i <= -800
+    @player.x = 50
+    @mainLoop()
+  else
+    log(oldLevel, newLevel, i)
+    oldLevel.draw(i)
+    newLevel.draw(800 + i)
+    setTimeout =>
+      @slideLevel(oldLevel, newLevel, i - 5)
+    , 0.5
+
 #unsure if this belongs in game... but where else would it go?
-game.drawBackground = ->
-  @level.draw()
+game.drawHUD = ->
   ctx.fillStyle = 'red'
   ctx.fillRect(10, 10, game.player.hp + 10, 10)
   ctx.fillRect(canvas.width - 150, 10, @latestEnemy.hp, 10) if @latestEnemy
@@ -54,6 +64,7 @@ game.drawBackground = ->
     @drawArrow(400)
     @drawArrow(200)
 
+#same with this... where does it go?
 game.drawArrow = (y) ->
   x = 700
   width = 50

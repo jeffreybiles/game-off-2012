@@ -16,11 +16,6 @@ lvl1.grid = [
   [1, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2]
 ]
 
-<<<<<<< HEAD
 lvl1.numEnemies = 1
 lvl1.mapGrid()
-=======
-lvl1.numEnemies = 3
-
->>>>>>> parent of 7bfae9e... level sliding COMPLETE!
 module.exports = lvl1
