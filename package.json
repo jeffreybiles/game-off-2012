@@ -1,6 +1,6 @@
 {
   "name": "gameoff",
-  "version": "0.0.1-22",
+  "version": "0.0.1-24",
   "private": false,
   "scripts": {
     "start": "coffee server.coffee"

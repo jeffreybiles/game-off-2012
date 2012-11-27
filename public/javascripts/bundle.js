@@ -770,6 +770,204 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
+require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
+
+  game = new Object();
+
+  game.enemies = [];
+
+  game.latestEnemy = null;
+
+  game.leftEdge = 0;
+
+  game.rightEdge = canvas.width;
+
+  game.topEdge = 0;
+
+  game.bottomEdge = canvas.height;
+
+  game.currentLevel = 1;
+
+  lvl1 = require('./levels/1');
+
+  lvl2 = require('./levels/2');
+
+  lvl3 = require('./levels/3');
+
+  lvl4 = require('./levels/4');
+
+  lvl5 = require('./levels/5');
+
+  lvl6 = require('./levels/6');
+
+  lvl7 = require('./levels/7');
+
+  lvl8 = require('./levels/8');
+
+  lvl9 = require('./levels/9');
+
+  lvl10 = require('./levels/10');
+
+  lvl11 = require('./levels/11');
+
+  lvl12 = require('./levels/12');
+
+  lvl13 = require('./levels/13');
+
+  lvl14 = require('./levels/14');
+
+  lvl15 = require('./levels/15');
+
+  lvl16 = require('./levels/16');
+
+  game.level = eval("lvl" + game.currentLevel);
+
+  game.mainLoop = function() {
+    var enemy, oldLevel, _i, _len, _ref, _results,
+      _this = this;
+    if (this.player.hp <= 0) {
+      this.start();
+    } else if (this.enemies.length === 0 && this.player.x > 700) {
+      this.currentLevel += 1;
+      oldLevel = this.level;
+      this.loadLevel();
+      this.slideLevel(oldLevel, this.level);
+    } else {
+      window.requestAnimationFrame(function() {
+        return _this.mainLoop();
+      });
+    }
+    this.level.draw(0);
+    this.drawHUD();
+    this.player.checkCollisions(this.enemies);
+    this.player.update();
+    this.player.control();
+    this.player.draw();
+    this.level.interactWith(this.player);
+    this.cleanDeadEnemies();
+    _ref = this.enemies;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      enemy = _ref[_i];
+      enemy.draw();
+      enemy.update();
+      enemy.move(this.level, this.player);
+      _results.push(this.level.interactWith(enemy));
+    }
+    return _results;
+  };
+
+  game.cleanDeadEnemies = function() {
+    var enemy;
+    return this.enemies = (function() {
+      var _i, _len, _ref, _results;
+      _ref = this.enemies;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        enemy = _ref[_i];
+        if (enemy.hp > 0) {
+          _results.push(enemy);
+        }
+      }
+      return _results;
+    }).call(this);
+  };
+
+  game.slideLevel = function(oldLevel, newLevel, i) {
+    var _this = this;
+    if (i == null) {
+      i = 0;
+    }
+    if (i <= -800) {
+      this.player.x = 50;
+      return this.mainLoop();
+    } else {
+      log(oldLevel, newLevel, i);
+      oldLevel.draw(i);
+      newLevel.draw(800 + i);
+      return setTimeout(function() {
+        return _this.slideLevel(oldLevel, newLevel, i - 5);
+      }, 0.5);
+    }
+  };
+
+  game.drawHUD = function() {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(10, 10, game.player.hp + 10, 10);
+    if (this.latestEnemy) {
+      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
+    }
+    if (this.enemies.length === 0) {
+      this.drawArrow(400);
+      return this.drawArrow(200);
+    }
+  };
+
+  game.drawArrow = function(y) {
+    var height, width, x;
+    x = 700;
+    width = 50;
+    height = 50;
+    ctx.fillStlye = 'black';
+    ctx.fillRect(x - width, y - height / 2, width, height);
+    ctx.beginPath();
+    ctx.moveTo(x, y - height);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+    return ctx.fill();
+  };
+
+  game.loadLevel = function() {
+    this.level = eval("lvl" + this.currentLevel);
+    this.enemies = [];
+    this.createEnemies();
+    return this.latestEnemy = this.enemies[0];
+  };
+
+  game.createEnemies = function() {
+    var centurionPrototype, enemy, enemyPrototype, mothPrototype, thisEnemy, _i, _len, _ref, _results;
+    enemyPrototype = require('../entities/enemy');
+    mothPrototype = require('../entities/moth');
+    centurionPrototype = require('../entities/centurion');
+    _ref = this.level.enemies;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      enemy = _ref[_i];
+      thisEnemy = (function() {
+        switch (enemy.type) {
+          case 'moth':
+            return object(mothPrototype);
+          case 'centurion':
+            return object(centurionPrototype);
+          default:
+            return object(enemyPrototype);
+        }
+      })();
+      if (enemy.x) {
+        thisEnemy.x = enemy.x;
+      }
+      if (enemy.y) {
+        thisEnemy.y = enemy.y;
+      }
+      _results.push(this.enemies.push(thisEnemy));
+    }
+    return _results;
+  };
+
+  game.start = function() {
+    this.player = object(playerPrototype);
+    this.loadLevel();
+    return this.mainLoop();
+  };
+
+  module.exports = game;
+
+}).call(this);
+
+});
+
 require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, lvl1;
 
@@ -1379,33 +1577,6 @@ require.define("/levels/12.coffee",function(require,module,exports,__dirname,__f
 
 });
 
-require.define("/entities/moth.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy, moth;
-
-  enemy = require('./enemy');
-
-  moth = object(enemy);
-
-  moth.lightness = 6;
-
-  moth.caution = 3;
-
-  moth.randomness = 2;
-
-  moth.seeking = 0.5;
-
-  moth.hp = 20;
-
-  moth.color = '9F9';
-
-  moth.damage = 5;
-
-  module.exports = moth;
-
-}).call(this);
-
-});
-
 require.define("/levels/13.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var level, lvl;
 
@@ -1474,35 +1645,6 @@ require.define("/levels/14.coffee",function(require,module,exports,__dirname,__f
   lvl.createTerrain();
 
   module.exports = lvl;
-
-}).call(this);
-
-});
-
-require.define("/entities/centurion.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var centurion, enemy;
-
-  enemy = require('./enemy');
-
-  centurion = object(enemy);
-
-  centurion.lightness = 0.1;
-
-  centurion.caution = 2.5;
-
-  centurion.randomness = 0;
-
-  centurion.seeking = 0.5;
-
-  centurion.hp = 100;
-
-  centurion.color = '333';
-
-  centurion.damage = 20;
-
-  centurion.bounciness = 0.3;
-
-  module.exports = centurion;
 
 }).call(this);
 
@@ -1610,199 +1752,57 @@ require.define("/levels/16.coffee",function(require,module,exports,__dirname,__f
 
 });
 
-require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
+require.define("/entities/moth.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy, moth;
 
-  game = new Object();
+  enemy = require('./enemy');
 
-  game.enemies = [];
+  moth = object(enemy);
 
-  game.latestEnemy = null;
+  moth.lightness = 6;
 
-  game.leftEdge = 0;
+  moth.caution = 3;
 
-  game.rightEdge = canvas.width;
+  moth.randomness = 2;
 
-  game.topEdge = 0;
+  moth.seeking = 0.5;
 
-  game.bottomEdge = canvas.height;
+  moth.hp = 20;
 
-  game.currentLevel = 1;
+  moth.color = '9F9';
 
-  lvl1 = require('./levels/1');
+  moth.damage = 5;
 
-  lvl2 = require('./levels/2');
+  module.exports = moth;
 
-  lvl3 = require('./levels/3');
+}).call(this);
 
-  lvl4 = require('./levels/4');
+});
 
-  lvl5 = require('./levels/5');
+require.define("/entities/centurion.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var centurion, enemy;
 
-  lvl6 = require('./levels/6');
+  enemy = require('./enemy');
 
-  lvl7 = require('./levels/7');
+  centurion = object(enemy);
 
-  lvl8 = require('./levels/8');
+  centurion.lightness = 0.1;
 
-  lvl9 = require('./levels/9');
+  centurion.caution = 2.5;
 
-  lvl10 = require('./levels/10');
+  centurion.randomness = 0;
 
-  lvl11 = require('./levels/11');
+  centurion.seeking = 0.5;
 
-  lvl12 = require('./levels/12');
+  centurion.hp = 100;
 
-  lvl13 = require('./levels/13');
+  centurion.color = '333';
 
-  lvl14 = require('./levels/14');
+  centurion.damage = 20;
 
-  lvl15 = require('./levels/15');
+  centurion.bounciness = 0.3;
 
-  lvl16 = require('./levels/16');
-
-  game.level = eval("lvl" + game.currentLevel);
-
-  game.mainLoop = function() {
-    var enemy, oldLevel, _i, _len, _ref, _results,
-      _this = this;
-    if (this.player.hp <= 0) {
-      this.start();
-    } else if (this.enemies.length === 0 && this.player.x > 700) {
-      this.currentLevel += 1;
-      oldLevel = this.level;
-      this.loadLevel();
-      this.slideLevel(oldLevel, this.level);
-    } else {
-      window.requestAnimationFrame(function() {
-        return _this.mainLoop();
-      });
-    }
-    this.level.draw(0);
-    this.drawHUD();
-    this.player.checkCollisions(this.enemies);
-    this.player.update();
-    this.player.control();
-    this.player.draw();
-    this.level.interactWith(this.player);
-    this.cleanDeadEnemies();
-    _ref = this.enemies;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      enemy = _ref[_i];
-      enemy.draw();
-      enemy.update();
-      enemy.move(this.level, this.player);
-      _results.push(this.level.interactWith(enemy));
-    }
-    return _results;
-  };
-
-  game.cleanDeadEnemies = function() {
-    var enemy;
-    return this.enemies = (function() {
-      var _i, _len, _ref, _results;
-      _ref = this.enemies;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        enemy = _ref[_i];
-        if (enemy.hp > 0) {
-          _results.push(enemy);
-        }
-      }
-      return _results;
-    }).call(this);
-  };
-
-  game.slideLevel = function(oldLevel, newLevel, i) {
-    var _this = this;
-    if (i == null) {
-      i = 0;
-    }
-    if (i <= -800) {
-      this.player.x = 50;
-      return this.mainLoop();
-    } else {
-      log(oldLevel, newLevel, i);
-      oldLevel.draw(i);
-      newLevel.draw(800 + i);
-      return setTimeout(function() {
-        return _this.slideLevel(oldLevel, newLevel, i - 5);
-      }, 0.5);
-    }
-  };
-
-  game.drawHUD = function() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(10, 10, game.player.hp + 10, 10);
-    if (this.latestEnemy) {
-      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
-    }
-    if (this.enemies.length === 0) {
-      this.drawArrow(400);
-      return this.drawArrow(200);
-    }
-  };
-
-  game.drawArrow = function(y) {
-    var height, width, x;
-    x = 700;
-    width = 50;
-    height = 50;
-    ctx.fillStlye = 'black';
-    ctx.fillRect(x - width, y - height / 2, width, height);
-    ctx.beginPath();
-    ctx.moveTo(x, y - height);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x, y + height);
-    ctx.closePath();
-    return ctx.fill();
-  };
-
-  game.loadLevel = function() {
-    this.level = eval("lvl" + this.currentLevel);
-    this.enemies = [];
-    this.createEnemies();
-    return this.latestEnemy = this.enemies[0];
-  };
-
-  game.createEnemies = function() {
-    var centurionPrototype, enemy, enemyPrototype, mothPrototype, thisEnemy, _i, _len, _ref, _results;
-    enemyPrototype = require('../entities/enemy');
-    mothPrototype = require('../entities/moth');
-    centurionPrototype = require('../entities/centurion');
-    _ref = this.level.enemies;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      enemy = _ref[_i];
-      thisEnemy = (function() {
-        switch (enemy.type) {
-          case 'moth':
-            return object(mothPrototype);
-          case 'centurion':
-            return object(centurionPrototype);
-          default:
-            return object(enemyPrototype);
-        }
-      })();
-      if (enemy.x) {
-        thisEnemy.x = enemy.x;
-      }
-      if (enemy.y) {
-        thisEnemy.y = enemy.y;
-      }
-      _results.push(this.enemies.push(thisEnemy));
-    }
-    return _results;
-  };
-
-  game.start = function() {
-    this.player = object(playerPrototype);
-    this.loadLevel();
-    return this.mainLoop();
-  };
-
-  module.exports = game;
+  module.exports = centurion;
 
 }).call(this);
 
