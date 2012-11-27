@@ -947,8 +947,99 @@ require.define("/levels/3.coffee",function(require,module,exports,__dirname,__fi
 
 });
 
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= 10;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    if (Math.random() > 0.9) {
+      this.changeDirection(level, player);
+    }
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    row = Math.floor(this.y / 50);
+    column = Math.floor(this.x / 50);
+    leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+    rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+    topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+    bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+    xDistance = player.x - this.x;
+    yDistance = player.x - this.y;
+    if (xDistance > 0 && rightOpen) {
+      this.dx += this.seeking;
+    }
+    if (xDistance < 0 && leftOpen) {
+      this.dx -= this.seeking;
+    }
+    if (yDistance > 0 && bottomOpen) {
+      this.dy += this.seeking;
+    }
+    if (yDistance < 0 && topOpen) {
+      this.dy -= this.seeking;
+    }
+    if (bottomOpen && Math.random() < 0.4) {
+      this.dy += this.randomness;
+    }
+    if (topOpen && Math.random() < 0.4) {
+      this.dy -= this.randomness;
+    }
+    if (leftOpen && Math.random() < 0.4) {
+      this.dx -= this.randomness;
+    }
+    if (rightOpen && Math.random() < 0.4) {
+      this.dx += this.randomness;
+    }
+    if (!bottomOpen) {
+      this.dy -= this.caution;
+    }
+    if (!topOpen) {
+      this.dy += this.caution;
+    }
+    if (!leftOpen) {
+      this.dx += this.caution;
+    }
+    if (!rightOpen) {
+      this.dx -= this.caution;
+    }
+    this.dx += (player.x - this.x) / 800;
+    return this.dy += (player.y - this.y) / 600;
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, lvl1, lvl2, lvl3;
+  var game, lvl1, lvl2, lvl3, lvl4;
 
   game = new Object();
 
@@ -964,13 +1055,15 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
   game.bottomEdge = canvas.height;
 
-  game.currentLevel = 3;
+  game.currentLevel = 4;
 
   lvl1 = require('./levels/1');
 
   lvl2 = require('./levels/2');
 
   lvl3 = require('./levels/3');
+
+  lvl4 = require('./levels/4');
 
   game.level = eval("lvl" + game.currentLevel);
 
@@ -1104,92 +1197,34 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
+require.define("/levels/4.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl;
 
-  enemy = object(require('./player'));
+  level = require('./level');
 
-  enemy.type = 'enemy';
+  lvl = object(level);
 
-  enemy.seeking = 0.3;
+  lvl.grid = ['1114444444444444', '1114444444444444', '1114444444444444', '1114444441111111', '1114444411222111', '1111111122232222', '2222222221131111', '1114444411111111', '1114444444444444', '1114444444444444', '1114444444444444', '1114444444444444'];
 
-  enemy.randomness = 1;
+  lvl.enemies = [
+    {
+      x: 280,
+      y: 275
+    }, {
+      x: 700,
+      y: 275
+    }, {
+      x: 600,
+      y: 275
+    }, {
+      x: 500,
+      y: 275
+    }
+  ];
 
-  enemy.caution = 1;
+  lvl.createTerrain();
 
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= 10;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    if (Math.random() > 0.9) {
-      this.changeDirection(level, player);
-    }
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    row = Math.floor(this.y / 50);
-    column = Math.floor(this.x / 50);
-    leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-    rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-    topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-    bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-    xDistance = player.x - this.x;
-    yDistance = player.x - this.y;
-    if (xDistance > 0 && rightOpen) {
-      this.dx += this.seeking;
-    }
-    if (xDistance < 0 && leftOpen) {
-      this.dx -= this.seeking;
-    }
-    if (yDistance > 0 && bottomOpen) {
-      this.dy += this.seeking;
-    }
-    if (yDistance < 0 && topOpen) {
-      this.dy -= this.seeking;
-    }
-    if (bottomOpen && Math.random() < 0.4) {
-      this.dy += this.randomness;
-    }
-    if (topOpen && Math.random() < 0.4) {
-      this.dy -= this.randomness;
-    }
-    if (leftOpen && Math.random() < 0.4) {
-      this.dx -= this.randomness;
-    }
-    if (rightOpen && Math.random() < 0.4) {
-      this.dx += this.randomness;
-    }
-    if (!bottomOpen) {
-      this.dy -= this.caution;
-    }
-    if (!topOpen) {
-      this.dy += this.caution;
-    }
-    if (!leftOpen) {
-      this.dx += this.caution;
-    }
-    if (!rightOpen) {
-      this.dx -= this.caution;
-    }
-    this.dx += (player.x - this.x) / 800;
-    return this.dy += (player.y - this.y) / 600;
-  };
-
-  module.exports = enemy;
+  module.exports = lvl;
 
 }).call(this);
 
