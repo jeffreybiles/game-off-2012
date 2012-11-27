@@ -17,5 +17,5 @@ lvl2.grid = [
 ]
 
 lvl2.numEnemies = 3
-lvl2.mapGrid()
+
 module.exports = lvl2

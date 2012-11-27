@@ -39,42 +39,19 @@ level.drawSquare = (row, column, offset) ->
   ctx.fillStyle = terrainTypes[square].color
   ctx.fillRect(column*@columnWidth + offset, row*@rowHeight, @columnWidth, @rowHeight)
 
-#This mess of a function creates a second map that will be useful in
-#1) making collision detection more efficient, and
-#2) making pathfinding possible
-level.mapGrid = ->
-  @newGrid = []
-  for row in [0...11]
-    newRow = []
-    for column in [0...15]
-      includedSquares = @listAdjacent(row, column)
-      includedTerrain = _.map(includedSquares, (coordinates) =>
-          terrainNumber = @grid[coordinates[0]][coordinates[1]]
-          return terrainTypes[terrainNumber]
-        )
-      newRow.push(
-        bounciness: _.reduce(includedTerrain, ((memo, terrain) -> memo + terrain.bounciness), 0)
-        damage: _.reduce(includedTerrain, ((memo, terrain) -> memo + terrain.damage), 0)
-      )
-    @newGrid.push(newRow)
-
-level.listAdjacent = (row, column) ->
-  [[row, column],
-   [row + 1, column],
-   [row, column + 1],
-   [row + 1, column + 1]
-  ]
-
-#If the terrain is damaging, you get hurt.  If bouncy, you bounce.
 level.interactWith = (entity) ->
   column = Math.floor(entity.x/@columnWidth)
   row = Math.floor(entity.y/@rowHeight)
-  terrain = @newGrid[row][column]
-  entity.hp -= terrain.damage
-  if terrain.bounciness
-    squaresOccupied = @listAdjacent(row, column)
-    for [row, column] in squaresOccupied
-      terrain = terrainTypes[@grid[row][column]]
-      entity.knockback({x: column*@rowHeight, y: row*@columnWidth}, terrain.bounciness)
+  squaresOccupied = [[row, column],
+                     [row + 1, column],
+                     [row, column + 1],
+                     [row + 1, column + 1]
+                    ]
+
+  for [row, column] in squaresOccupied
+    terrain = terrainTypes[@grid[row][column]]
+    entity.knockback({x: column*@rowHeight, y: row*@columnWidth}, terrain.bounciness)
+    entity.hp -= terrain.damage
+
 
 module.exports = level

@@ -3,6 +3,5 @@ window.onload = function(){
   require('./lib/helper')
   require('./lib/mousetrap')
   require('./lib/extratrap')
-  require('./lib/underscore')
   require('./init')
 }
