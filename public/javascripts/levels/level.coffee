@@ -8,7 +8,6 @@ thorns = require('./terrain/thorns')
 
 #ok, test this out using jasmine
 level.createTerrain = ->
-
   @terrain = []
   for i in [0...@grid.length]
     row = []
@@ -46,5 +45,10 @@ level.interactWith = (entity) ->
     entity.knockback({x: column*@rowHeight, y: row*@columnWidth}, square.bounciness)
     entity.hp -= square.damage
 
+level.squareOpen = (row, column) ->
+  if row < 0 or column < 0 or row > 11 or column > 15
+    return false
+  else
+    return @terrain[row][column].passable()
 
 module.exports = level

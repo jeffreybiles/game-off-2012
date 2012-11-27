@@ -38,6 +38,7 @@ game.mainLoop = ->
   for enemy in @enemies
     enemy.draw()
     enemy.update()
+    enemy.move(@level, @player)
     @level.interactWith(enemy)
 
 game.cleanDeadEnemies = ->
