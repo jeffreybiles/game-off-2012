@@ -21,17 +21,20 @@ level.createTerrain = ->
       row.push(newSquare)
     @terrain.push(row)
 
+level.numRows = ->  @grid.length
+level.numColumns = ->  @grid[0].length
+
 level.draw = (offset = 0) ->
-  for row in [0...@terrain.length]
-    for column in [0...@terrain[0].length]
+  for row in [0...@numRows()]
+    for column in [0...@numColumns()]
       @terrain[row][column].draw(offset)
 
 level.columnWidth = 50
 level.rowHeight = 50
 
 level.interactWith = (entity) ->
-  column = Math.floor(entity.x/@columnWidth)
-  row = Math.floor(entity.y/@rowHeight)
+  column = floorWithin(entity.x/@columnWidth, 0, @numColumns())
+  row = floorWithin(entity.y/@rowHeight, 0, @numRows())
   squaresOccupied = [[row, column],
                      [row + 1, column],
                      [row, column + 1],
@@ -48,5 +51,7 @@ level.squareOpen = (row, column) ->
     return false
   else
     return @terrain[row][column].passable()
+
+
 
 module.exports = level
