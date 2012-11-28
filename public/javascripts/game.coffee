@@ -66,9 +66,17 @@ game.slideLevel = (oldLevel, newLevel, i = 0) ->
     log(oldLevel, newLevel, i)
     oldLevel.draw(i)
     newLevel.draw(800 + i)
+    @drawTitle(newLevel)
     setTimeout =>
       @slideLevel(oldLevel, newLevel, i - 5)
     , 0.5
+
+game.drawTitle = (level) ->
+    ctx.fillStyle = 'black'
+    ctx.font = 'italic 75px Calibri';
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(level.name, canvas.width/2, canvas.height/2);
 
 #unsure if this belongs in game... but where else would it go?
 game.drawHUD = ->

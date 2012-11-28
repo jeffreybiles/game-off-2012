@@ -21,6 +21,7 @@ lvl1.enemies = [
 ]
 
 lvl1.createTerrain()
+lvl1.name = 'duel'
 
 
 module.exports = lvl1

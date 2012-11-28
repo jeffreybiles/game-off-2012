@@ -22,5 +22,6 @@ lvl2.enemies = [
 ]
 
 lvl2.createTerrain()
+lvl2.name = 'separation'
 
 module.exports = lvl2

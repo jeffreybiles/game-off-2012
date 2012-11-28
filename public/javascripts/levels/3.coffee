@@ -22,6 +22,7 @@ lvl3.enemies = [
   {x: 700, y: 500}
 ]
 lvl3.createTerrain()
+lvl3.name = 'shock'
 
 
 module.exports = lvl3
