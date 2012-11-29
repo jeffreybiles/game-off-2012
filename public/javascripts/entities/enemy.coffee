@@ -39,8 +39,8 @@ enemy.changeDirection = (level, player) ->
     @y -= @lightness if yDistance < 0
 
   if Math.random() > 0.9
-    row = floorWithin(@y/50, 0, game.level.numRows())
-    column = floorWithin(@x/50, 0, game.level.numColumns())
+    row = floorWithin(@y/50, 0, game.level.numRows() - 2)
+    column = floorWithin(@x/50, 0, game.level.numColumns() - 2)
     leftOpen = level.squareOpen(row, column - 1) and level.squareOpen(row + 1, column - 1)
     rightOpen = level.squareOpen(row, column + 2) and level.squareOpen(row + 1, column + 2)
     topOpen = level.squareOpen(row - 1, column) and level.squareOpen(row - 1, column + 1)

@@ -33,8 +33,8 @@ level.columnWidth = 50
 level.rowHeight = 50
 
 level.interactWith = (entity) ->
-  column = floorWithin(entity.x/@columnWidth, 0, @numColumns())
-  row = floorWithin(entity.y/@rowHeight, 0, @numRows())
+  column = floorWithin(entity.x/@columnWidth, 0, @numColumns() - 2)
+  row = floorWithin(entity.y/@rowHeight, 0, @numRows() - 2)
   squaresOccupied = [[row, column],
                      [row + 1, column],
                      [row, column + 1],

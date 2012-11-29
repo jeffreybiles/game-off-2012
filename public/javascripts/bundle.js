@@ -435,6 +435,24 @@ require.define("/lib/extratrap.js",function(require,module,exports,__dirname,__f
 })();
 });
 
+require.define("/lib/keyblocker.js",function(require,module,exports,__dirname,__filename,process,global){var keys = [];
+window.addEventListener("keydown",
+    function(e){
+        keys[e.keyCode] = true;
+        switch(e.keyCode){
+            case 37: case 39: case 38:  case 40: // Arrow keys
+            case 32: e.preventDefault(); break; // Space
+            default: break; // do not block other keys
+        }
+    },
+false);
+window.addEventListener('keyup',
+    function(e){
+        keys[e.keyCode] = false;
+    },
+false);
+});
+
 require.define("/init.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
   canvas = document.getElementById("mainCanvas")
   ctx = canvas.getContext("2d")
@@ -642,6 +660,239 @@ require.define("/entities/sword.coffee",function(require,module,exports,__dirnam
 
 });
 
+require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
+
+  game = new Object();
+
+  game.enemies = [];
+
+  game.latestEnemy = null;
+
+  game.leftEdge = 0;
+
+  game.rightEdge = canvas.width;
+
+  game.topEdge = 0;
+
+  game.bottomEdge = canvas.height;
+
+  game.currentLevel = 1;
+
+  lvl1 = require('./levels/1');
+
+  lvl2 = require('./levels/2');
+
+  lvl3 = require('./levels/3');
+
+  lvl4 = require('./levels/4');
+
+  lvl5 = require('./levels/5');
+
+  lvl6 = require('./levels/6');
+
+  lvl7 = require('./levels/7');
+
+  lvl8 = require('./levels/8');
+
+  lvl9 = require('./levels/9');
+
+  lvl10 = require('./levels/10');
+
+  lvl11 = require('./levels/11');
+
+  lvl12 = require('./levels/12');
+
+  lvl13 = require('./levels/13');
+
+  lvl14 = require('./levels/14');
+
+  lvl15 = require('./levels/15');
+
+  lvl16 = require('./levels/16');
+
+  game.level = eval("lvl" + game.currentLevel);
+
+  game.mainLoop = function() {
+    var enemy, oldLevel, _i, _len, _ref, _results,
+      _this = this;
+    if (this.player.hp <= 0) {
+      this.start();
+    } else if (this.enemies.length === 0 && this.player.x > 700) {
+      this.currentLevel += 1;
+      oldLevel = this.level;
+      this.loadLevel();
+      this.slideLevel(oldLevel, this.level);
+    } else {
+      window.requestAnimationFrame(function() {
+        return _this.mainLoop();
+      });
+    }
+    this.level.draw(0);
+    this.drawHUD();
+    this.player.checkCollisions(this.enemies);
+    this.player.update();
+    this.player.control();
+    this.player.draw();
+    this.level.interactWith(this.player);
+    this.cleanDeadEnemies();
+    _ref = this.enemies;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      enemy = _ref[_i];
+      enemy.draw();
+      enemy.update();
+      enemy.move(this.level, this.player);
+      _results.push(this.level.interactWith(enemy));
+    }
+    return _results;
+  };
+
+  game.cleanDeadEnemies = function() {
+    var enemy;
+    return this.enemies = (function() {
+      var _i, _len, _ref, _results;
+      _ref = this.enemies;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        enemy = _ref[_i];
+        if (enemy.hp > 0) {
+          _results.push(enemy);
+        }
+      }
+      return _results;
+    }).call(this);
+  };
+
+  game.slideLevel = function(oldLevel, newLevel, i) {
+    var _this = this;
+    if (i == null) {
+      i = 0;
+    }
+    if (i <= -800) {
+      this.player.x = 50;
+      return this.mainLoop();
+    } else {
+      log(oldLevel, newLevel, i);
+      oldLevel.draw(i);
+      newLevel.draw(800 + i);
+      this.drawTitle(newLevel);
+      return setTimeout(function() {
+        return _this.slideLevel(oldLevel, newLevel, i - 5);
+      }, 0.5);
+    }
+  };
+
+  game.drawTitle = function(level) {
+    ctx.fillStyle = 'black';
+    ctx.font = 'italic 75px Calibri';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    return ctx.fillText(level.name, canvas.width / 2, canvas.height / 2);
+  };
+
+  game.drawHUD = function() {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(10, 10, game.player.hp + 10, 10);
+    if (this.latestEnemy) {
+      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
+    }
+    if (this.enemies.length === 0) {
+      this.drawArrow(400);
+      return this.drawArrow(200);
+    }
+  };
+
+  game.drawArrow = function(y) {
+    var height, width, x;
+    x = 700;
+    width = 50;
+    height = 50;
+    ctx.fillStlye = 'black';
+    ctx.fillRect(x - width, y - height / 2, width, height);
+    ctx.beginPath();
+    ctx.moveTo(x, y - height);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+    return ctx.fill();
+  };
+
+  game.loadLevel = function() {
+    this.level = eval("lvl" + this.currentLevel);
+    this.enemies = [];
+    this.createEnemies();
+    return this.latestEnemy = this.enemies[0];
+  };
+
+  game.createEnemies = function() {
+    var centurionPrototype, enemy, enemyPrototype, mothPrototype, thisEnemy, _i, _len, _ref, _results;
+    enemyPrototype = require('../entities/enemy');
+    mothPrototype = require('../entities/moth');
+    centurionPrototype = require('../entities/centurion');
+    _ref = this.level.enemies;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      enemy = _ref[_i];
+      thisEnemy = (function() {
+        switch (enemy.type) {
+          case 'moth':
+            return object(mothPrototype);
+          case 'centurion':
+            return object(centurionPrototype);
+          default:
+            return object(enemyPrototype);
+        }
+      })();
+      if (enemy.x) {
+        thisEnemy.x = enemy.x;
+      }
+      if (enemy.y) {
+        thisEnemy.y = enemy.y;
+      }
+      _results.push(this.enemies.push(thisEnemy));
+    }
+    return _results;
+  };
+
+  game.start = function() {
+    this.player = object(playerPrototype);
+    this.loadLevel();
+    return this.mainLoop();
+  };
+
+  module.exports = game;
+
+}).call(this);
+
+});
+
+require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl1;
+
+  level = require('./level');
+
+  lvl1 = object(level);
+
+  lvl1.grid = ['1111111111111111', '1111111111111111', '1111111111111111', '2222222221111111', '1111111121111111', '1111111121111111', '1111111121112222', '1111111122222111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
+
+  lvl1.enemies = [
+    {
+      x: 500,
+      y: 500
+    }
+  ];
+
+  lvl1.createTerrain();
+
+  lvl1.name = 'duel';
+
+  module.exports = lvl1;
+
+}).call(this);
+
+});
+
 require.define("/levels/terrain/grass.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var grass, terrain;
 
@@ -757,6 +1008,67 @@ require.define("/levels/terrain/thorns.coffee",function(require,module,exports,_
   thorns.damage = 10;
 
   module.exports = thorns;
+
+}).call(this);
+
+});
+
+require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl2;
+
+  level = require('./level');
+
+  lvl2 = object(level);
+
+  lvl2.grid = ['1111111111111111', '1111111111111111', '3333333331111111', '1111111131111111', '1111111131111111', '1111111131111111', '2221111131222222', '1121111131211111', '1121111131211111', '1121111131211111', '1122222222211111', '1111111111111111'];
+
+  lvl2.enemies = [
+    {
+      x: 10,
+      y: 10
+    }, {
+      x: 300,
+      y: 400
+    }
+  ];
+
+  lvl2.createTerrain();
+
+  lvl2.name = 'separation';
+
+  module.exports = lvl2;
+
+}).call(this);
+
+});
+
+require.define("/levels/3.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var level, lvl3;
+
+  level = require('./level');
+
+  lvl3 = object(level);
+
+  lvl3.grid = ['1111111111111111', '1111111111441111', '1111111111441111', '1122222222111111', '1121111112222111', '1121111444112111', '2221111444112222', '1111111444111111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
+
+  lvl3.enemies = [
+    {
+      x: 100,
+      y: 100
+    }, {
+      x: 500,
+      y: 300
+    }, {
+      x: 700,
+      y: 500
+    }
+  ];
+
+  lvl3.createTerrain();
+
+  lvl3.name = 'shock';
+
+  module.exports = lvl3;
 
 }).call(this);
 
@@ -1301,6 +1613,150 @@ require.define("/entities/centurion.coffee",function(require,module,exports,__di
 
 });
 
+require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  object = function(o){
+    function F(){}
+    F.prototype = o
+    return new F()
+  }
+
+  log = function(){
+    console.log(arguments)
+  }
+
+  floorWithin = function(num, min, max) {
+  if (min == null) {
+    min = Number.NEGATIVE_INFINITY;
+  }
+  if (max == null) {
+    max = Number.POSITIVEINFINITY;
+  }
+  if (num < min) {
+    num = min;
+  }
+  if (num > max) {
+    num = max;
+  }
+  return Math.floor(num);
+};
+})()
+});
+
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.lightness = 2;
+
+  enemy.damage = 10;
+
+  enemy.x = 700;
+
+  enemy.y = 275;
+
+  enemy.hp = 50;
+
+  enemy.color = '#980';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= this.damage;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    this.changeDirection(level, player);
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    xDistance = player.x - this.x;
+    yDistance = player.y - this.y;
+    if (player.pulling) {
+      if (xDistance > 0) {
+        this.x += this.lightness;
+      }
+      if (xDistance < 0) {
+        this.x -= this.lightness;
+      }
+      if (yDistance > 0) {
+        this.y += this.lightness;
+      }
+      if (yDistance < 0) {
+        this.y -= this.lightness;
+      }
+    }
+    if (Math.random() > 0.9) {
+      row = floorWithin(this.y / 50, 0, game.level.numRows() - 2);
+      column = floorWithin(this.x / 50, 0, game.level.numColumns() - 2);
+      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+      if (xDistance > 0 && rightOpen) {
+        this.dx += this.seeking;
+      }
+      if (xDistance < 0 && leftOpen) {
+        this.dx -= this.seeking;
+      }
+      if (yDistance > 0 && bottomOpen) {
+        this.dy += this.seeking;
+      }
+      if (yDistance < 0 && topOpen) {
+        this.dy -= this.seeking;
+      }
+      if (bottomOpen && Math.random() < 0.4) {
+        this.dy += this.randomness;
+      }
+      if (topOpen && Math.random() < 0.4) {
+        this.dy -= this.randomness;
+      }
+      if (leftOpen && Math.random() < 0.4) {
+        this.dx -= this.randomness;
+      }
+      if (rightOpen && Math.random() < 0.4) {
+        this.dx += this.randomness;
+      }
+      if (!bottomOpen) {
+        this.dy -= this.caution;
+      }
+      if (!topOpen) {
+        this.dy += this.caution;
+      }
+      if (!leftOpen) {
+        this.dx += this.caution;
+      }
+      if (!rightOpen) {
+        return this.dx -= this.caution;
+      }
+    }
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var dirt, grass, lava, level, thorns, wall;
 
@@ -1379,8 +1835,8 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
 
   level.interactWith = function(entity) {
     var column, row, square, squaresOccupied, _i, _len, _ref, _results;
-    column = floorWithin(entity.x / this.columnWidth, 0, this.numColumns());
-    row = floorWithin(entity.y / this.rowHeight, 0, this.numRows());
+    column = floorWithin(entity.x / this.columnWidth, 0, this.numColumns() - 2);
+    row = floorWithin(entity.y / this.rowHeight, 0, this.numRows() - 2);
     squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
     _results = [];
     for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
@@ -1409,449 +1865,12 @@ require.define("/levels/level.coffee",function(require,module,exports,__dirname,
 
 });
 
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(require('./player'));
-
-  enemy.type = 'enemy';
-
-  enemy.seeking = 0.3;
-
-  enemy.randomness = 1;
-
-  enemy.caution = 1;
-
-  enemy.lightness = 2;
-
-  enemy.damage = 10;
-
-  enemy.x = 700;
-
-  enemy.y = 275;
-
-  enemy.hp = 50;
-
-  enemy.color = '#980';
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= this.damage;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    this.changeDirection(level, player);
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    xDistance = player.x - this.x;
-    yDistance = player.y - this.y;
-    if (player.pulling) {
-      if (xDistance > 0) {
-        this.x += this.lightness;
-      }
-      if (xDistance < 0) {
-        this.x -= this.lightness;
-      }
-      if (yDistance > 0) {
-        this.y += this.lightness;
-      }
-      if (yDistance < 0) {
-        this.y -= this.lightness;
-      }
-    }
-    if (Math.random() > 0.9) {
-      row = floorWithin(this.y / 50, 0, game.level.numRows());
-      column = floorWithin(this.x / 50, 0, game.level.numColumns());
-      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-      if (xDistance > 0 && rightOpen) {
-        this.dx += this.seeking;
-      }
-      if (xDistance < 0 && leftOpen) {
-        this.dx -= this.seeking;
-      }
-      if (yDistance > 0 && bottomOpen) {
-        this.dy += this.seeking;
-      }
-      if (yDistance < 0 && topOpen) {
-        this.dy -= this.seeking;
-      }
-      if (bottomOpen && Math.random() < 0.4) {
-        this.dy += this.randomness;
-      }
-      if (topOpen && Math.random() < 0.4) {
-        this.dy -= this.randomness;
-      }
-      if (leftOpen && Math.random() < 0.4) {
-        this.dx -= this.randomness;
-      }
-      if (rightOpen && Math.random() < 0.4) {
-        this.dx += this.randomness;
-      }
-      if (!bottomOpen) {
-        this.dy -= this.caution;
-      }
-      if (!topOpen) {
-        this.dy += this.caution;
-      }
-      if (!leftOpen) {
-        this.dx += this.caution;
-      }
-      if (!rightOpen) {
-        return this.dx -= this.caution;
-      }
-    }
-  };
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
-require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  object = function(o){
-    function F(){}
-    F.prototype = o
-    return new F()
-  }
-
-  log = function(){
-    console.log(arguments)
-  }
-
-  floorWithin = function(num, min, max) {
-  if (min == null) {
-    min = Number.NEGATIVE_INFINITY;
-  }
-  if (max == null) {
-    max = Number.POSITIVEINFINITY;
-  }
-  if (num < min) {
-    num = min;
-  }
-  if (num > max) {
-    num = max;
-  }
-  return Math.floor(num);
-};
-})()
-});
-
-require.define("/levels/3.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl3;
-
-  level = require('./level');
-
-  lvl3 = object(level);
-
-  lvl3.grid = ['1111111111111111', '1111111111441111', '1111111111441111', '1122222222111111', '1121111112222111', '1121111444112111', '2221111444112222', '1111111444111111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
-
-  lvl3.enemies = [
-    {
-      x: 100,
-      y: 100
-    }, {
-      x: 500,
-      y: 300
-    }, {
-      x: 700,
-      y: 500
-    }
-  ];
-
-  lvl3.createTerrain();
-
-  lvl3.name = 'shock';
-
-  module.exports = lvl3;
-
-}).call(this);
-
-});
-
-require.define("/levels/2.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl2;
-
-  level = require('./level');
-
-  lvl2 = object(level);
-
-  lvl2.grid = ['1111111111111111', '1111111111111111', '3333333331111111', '1111111131111111', '1111111131111111', '1111111131111111', '2221111131222222', '1121111131211111', '1121111131211111', '1121111131211111', '1122222222211111', '1111111111111111'];
-
-  lvl2.enemies = [
-    {
-      x: 10,
-      y: 10
-    }, {
-      x: 300,
-      y: 400
-    }
-  ];
-
-  lvl2.createTerrain();
-
-  lvl2.name = 'separation';
-
-  module.exports = lvl2;
-
-}).call(this);
-
-});
-
-require.define("/levels/1.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var level, lvl1;
-
-  level = require('./level');
-
-  lvl1 = object(level);
-
-  lvl1.grid = ['1111111111111111', '1111111111111111', '1111111111111111', '2222222221111111', '1111111121111111', '1111111121111111', '1111111121112222', '1111111122222111', '1111111111111111', '1111111111111111', '1111111111111111', '1111111111111111'];
-
-  lvl1.enemies = [
-    {
-      x: 500,
-      y: 500
-    }
-  ];
-
-  lvl1.createTerrain();
-
-  lvl1.name = 'duel';
-
-  module.exports = lvl1;
-
-}).call(this);
-
-});
-
-require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
-
-  game = new Object();
-
-  game.enemies = [];
-
-  game.latestEnemy = null;
-
-  game.leftEdge = 0;
-
-  game.rightEdge = canvas.width;
-
-  game.topEdge = 0;
-
-  game.bottomEdge = canvas.height;
-
-  game.currentLevel = 1;
-
-  lvl1 = require('./levels/1');
-
-  lvl2 = require('./levels/2');
-
-  lvl3 = require('./levels/3');
-
-  lvl4 = require('./levels/4');
-
-  lvl5 = require('./levels/5');
-
-  lvl6 = require('./levels/6');
-
-  lvl7 = require('./levels/7');
-
-  lvl8 = require('./levels/8');
-
-  lvl9 = require('./levels/9');
-
-  lvl10 = require('./levels/10');
-
-  lvl11 = require('./levels/11');
-
-  lvl12 = require('./levels/12');
-
-  lvl13 = require('./levels/13');
-
-  lvl14 = require('./levels/14');
-
-  lvl15 = require('./levels/15');
-
-  lvl16 = require('./levels/16');
-
-  game.level = eval("lvl" + game.currentLevel);
-
-  game.mainLoop = function() {
-    var enemy, oldLevel, _i, _len, _ref, _results,
-      _this = this;
-    if (this.player.hp <= 0) {
-      this.start();
-    } else if (this.enemies.length === 0 && this.player.x > 700) {
-      this.currentLevel += 1;
-      oldLevel = this.level;
-      this.loadLevel();
-      this.slideLevel(oldLevel, this.level);
-    } else {
-      window.requestAnimationFrame(function() {
-        return _this.mainLoop();
-      });
-    }
-    this.level.draw(0);
-    this.drawHUD();
-    this.player.checkCollisions(this.enemies);
-    this.player.update();
-    this.player.control();
-    this.player.draw();
-    this.level.interactWith(this.player);
-    this.cleanDeadEnemies();
-    _ref = this.enemies;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      enemy = _ref[_i];
-      enemy.draw();
-      enemy.update();
-      enemy.move(this.level, this.player);
-      _results.push(this.level.interactWith(enemy));
-    }
-    return _results;
-  };
-
-  game.cleanDeadEnemies = function() {
-    var enemy;
-    return this.enemies = (function() {
-      var _i, _len, _ref, _results;
-      _ref = this.enemies;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        enemy = _ref[_i];
-        if (enemy.hp > 0) {
-          _results.push(enemy);
-        }
-      }
-      return _results;
-    }).call(this);
-  };
-
-  game.slideLevel = function(oldLevel, newLevel, i) {
-    var _this = this;
-    if (i == null) {
-      i = 0;
-    }
-    if (i <= -800) {
-      this.player.x = 50;
-      return this.mainLoop();
-    } else {
-      log(oldLevel, newLevel, i);
-      oldLevel.draw(i);
-      newLevel.draw(800 + i);
-      this.drawTitle(newLevel);
-      return setTimeout(function() {
-        return _this.slideLevel(oldLevel, newLevel, i - 5);
-      }, 0.5);
-    }
-  };
-
-  game.drawTitle = function(level) {
-    ctx.fillStyle = 'black';
-    ctx.font = 'italic 75px Calibri';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    return ctx.fillText(level.name, canvas.width / 2, canvas.height / 2);
-  };
-
-  game.drawHUD = function() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(10, 10, game.player.hp + 10, 10);
-    if (this.latestEnemy) {
-      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
-    }
-    if (this.enemies.length === 0) {
-      this.drawArrow(400);
-      return this.drawArrow(200);
-    }
-  };
-
-  game.drawArrow = function(y) {
-    var height, width, x;
-    x = 700;
-    width = 50;
-    height = 50;
-    ctx.fillStlye = 'black';
-    ctx.fillRect(x - width, y - height / 2, width, height);
-    ctx.beginPath();
-    ctx.moveTo(x, y - height);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x, y + height);
-    ctx.closePath();
-    return ctx.fill();
-  };
-
-  game.loadLevel = function() {
-    this.level = eval("lvl" + this.currentLevel);
-    this.enemies = [];
-    this.createEnemies();
-    return this.latestEnemy = this.enemies[0];
-  };
-
-  game.createEnemies = function() {
-    var centurionPrototype, enemy, enemyPrototype, mothPrototype, thisEnemy, _i, _len, _ref, _results;
-    enemyPrototype = require('../entities/enemy');
-    mothPrototype = require('../entities/moth');
-    centurionPrototype = require('../entities/centurion');
-    _ref = this.level.enemies;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      enemy = _ref[_i];
-      thisEnemy = (function() {
-        switch (enemy.type) {
-          case 'moth':
-            return object(mothPrototype);
-          case 'centurion':
-            return object(centurionPrototype);
-          default:
-            return object(enemyPrototype);
-        }
-      })();
-      if (enemy.x) {
-        thisEnemy.x = enemy.x;
-      }
-      if (enemy.y) {
-        thisEnemy.y = enemy.y;
-      }
-      _results.push(this.enemies.push(thisEnemy));
-    }
-    return _results;
-  };
-
-  game.start = function() {
-    this.player = object(playerPrototype);
-    this.loadLevel();
-    return this.mainLoop();
-  };
-
-  module.exports = game;
-
-}).call(this);
-
-});
-
 require.define("/entry.js",function(require,module,exports,__dirname,__filename,process,global){window.onload = function(){
   require('./lib/animationFrame')
   require('./lib/helper')
   require('./lib/mousetrap')
   require('./lib/extratrap')
+  require('./lib/keyblocker')
   require('./init')
 }
 });
