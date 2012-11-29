@@ -33,8 +33,9 @@ game.mainLoop = ->
   else if @enemies.length == 0 && @player.x > 700
     @currentLevel += 1
     oldLevel = @level
-    @loadLevel()
-    @slideLevel(oldLevel, @level)
+    window.requestAnimationFrame =>
+      @loadLevel()
+      @slideLevel(oldLevel, @level)
   else
     window.requestAnimationFrame =>
       @mainLoop()
