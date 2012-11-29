@@ -27,6 +27,10 @@ app.configure 'development', ->
 
 app.get('/', routes.index)
 
+app.get('/about',  (req, res) ->
+  res.render('about', { title: 'About Us' });
+)
+
 global.canvas_width = 800
 global.canvas_height = 600
 
