@@ -1,10 +1,13 @@
 This game has it all!
 
 **Clones**
+
 **Pulling**
+
 **Imaginary, Invisible Forks**
 
-![screenshot](/public/gitcraftscreenshot.jpg)
+![screenshot](https://s3.amazonaws.com/jeffreysite/gitcraftscreenshot.jpg)
+
 We use
 
 * Node.js
