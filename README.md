@@ -4,18 +4,18 @@ browserify entry.js -o bundle.js
 This game has it all!
 
 **Clones**
-**Pushing**
 **Pulling**
-**Forks**
+**Imaginary, Invisible Forks**
 
 We use
 
 * Node.js
 * Browserify
-* Jade
 * CoffeeScript
+* Mousetrap
+* Jade
 
-This game was started on Saturday, Nov. 24th.
+This game was started on Saturday, Nov. 24th and finished on Friday, Nov. 30th.
 
 ##Please Note
 

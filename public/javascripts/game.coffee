@@ -81,9 +81,9 @@ game.drawTitle = (level) ->
 
 #unsure if this belongs in game... but where else would it go?
 game.drawHUD = ->
-  ctx.fillStyle = 'red'
-  ctx.fillRect(10, 10, game.player.hp + 10, 10)
-  ctx.fillRect(canvas.width - 150, 10, @latestEnemy.hp, 10) if @latestEnemy
+  ctx.fillStyle = 'black'
+  ctx.fillRect(10, 10, game.player.hp*2 + 10, 20)
+  ctx.fillRect(canvas.width - @latestEnemy.hp*2 - 10, 10, @latestEnemy.hp*2, 20) if @latestEnemy
   if @enemies.length == 0
     @drawArrow(400)
     @drawArrow(200)

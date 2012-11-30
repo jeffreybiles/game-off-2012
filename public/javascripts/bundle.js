@@ -417,6 +417,35 @@ require.define("/lib/animationFrame.js",function(require,module,exports,__dirnam
 }());
 });
 
+require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
+  object = function(o){
+    function F(){}
+    F.prototype = o
+    return new F()
+  }
+
+  log = function(){
+    console.log(arguments)
+  }
+
+  floorWithin = function(num, min, max) {
+  if (min == null) {
+    min = Number.NEGATIVE_INFINITY;
+  }
+  if (max == null) {
+    max = Number.POSITIVEINFINITY;
+  }
+  if (num < min) {
+    num = min;
+  }
+  if (num > max) {
+    num = max;
+  }
+  return Math.floor(num);
+};
+})()
+});
+
 require.define("/lib/mousetrap.js",function(require,module,exports,__dirname,__filename,process,global){/* mousetrap v1.2.1 craig.is/killing/mice */
 (function(){function q(a,c,b){a.addEventListener?a.addEventListener(c,b,!1):a.attachEvent("on"+c,b)}function x(a){return"keypress"==a.type?String.fromCharCode(a.which):h[a.which]?h[a.which]:y[a.which]?y[a.which]:String.fromCharCode(a.which).toLowerCase()}function r(a){var a=a||{},c=!1,b;for(b in l)a[b]?c=!0:l[b]=0;c||(n=!1)}function z(a,c,b,d,F){var g,e,f=[],j=b.type;if(!k[a])return[];"keyup"==j&&s(a)&&(c=[a]);for(g=0;g<k[a].length;++g)if(e=k[a][g],!(e.seq&&l[e.seq]!=e.level)&&j==e.action&&("keypress"==
 j&&!b.metaKey&&!b.ctrlKey||c.sort().join(",")===e.modifiers.sort().join(",")))d&&e.combo==F&&k[a].splice(g,1),f.push(e);return f}function t(a,c,b){if(!u.stopCallback(c,c.target||c.srcElement,b)&&!1===a(c,b))c.preventDefault&&c.preventDefault(),c.stopPropagation&&c.stopPropagation(),c.returnValue=!1,c.cancelBubble=!0}function v(a){"number"!==typeof a.which&&(a.which=a.keyCode);var c=x(a);if(c)if("keyup"==a.type&&w==c)w=!1;else{var b=[];a.shiftKey&&b.push("shift");a.altKey&&b.push("alt");a.ctrlKey&&
@@ -633,6 +662,121 @@ require.define("/entities/entity.coffee",function(require,module,exports,__dirna
 
 });
 
+require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var enemy;
+
+  enemy = object(require('./player'));
+
+  enemy.type = 'enemy';
+
+  enemy.seeking = 0.3;
+
+  enemy.randomness = 1;
+
+  enemy.caution = 1;
+
+  enemy.lightness = 2;
+
+  enemy.damage = 10;
+
+  enemy.x = 700;
+
+  enemy.y = 275;
+
+  enemy.hp = 50;
+
+  enemy.color = '#980';
+
+  enemy.hit = function(hitter) {
+    this.hurt(hitter);
+    return this.knockback(hitter);
+  };
+
+  enemy.hurt = function(hitter) {
+    return hitter.hp -= this.damage;
+  };
+
+  enemy.randomizePosition = function() {
+    this.x = Math.random() * canvas.width;
+    return this.y = Math.random() * canvas.height;
+  };
+
+  enemy.move = function(level, player) {
+    this.changeDirection(level, player);
+    this.x += this.dx;
+    return this.y += this.dy;
+  };
+
+  enemy.changeDirection = function(level, player) {
+    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
+    xDistance = player.x - this.x;
+    yDistance = player.y - this.y;
+    if (player.pulling) {
+      if (xDistance > 0) {
+        this.x += this.lightness;
+      }
+      if (xDistance < 0) {
+        this.x -= this.lightness;
+      }
+      if (yDistance > 0) {
+        this.y += this.lightness;
+      }
+      if (yDistance < 0) {
+        this.y -= this.lightness;
+      }
+    }
+    if (Math.random() > 0.9) {
+      row = floorWithin(this.y / 50, 0, game.level.numRows() - 2);
+      column = floorWithin(this.x / 50, 0, game.level.numColumns() - 2);
+      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
+      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
+      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
+      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
+      if (xDistance > 0 && rightOpen) {
+        this.dx += this.seeking;
+      }
+      if (xDistance < 0 && leftOpen) {
+        this.dx -= this.seeking;
+      }
+      if (yDistance > 0 && bottomOpen) {
+        this.dy += this.seeking;
+      }
+      if (yDistance < 0 && topOpen) {
+        this.dy -= this.seeking;
+      }
+      if (bottomOpen && Math.random() < 0.4) {
+        this.dy += this.randomness;
+      }
+      if (topOpen && Math.random() < 0.4) {
+        this.dy -= this.randomness;
+      }
+      if (leftOpen && Math.random() < 0.4) {
+        this.dx -= this.randomness;
+      }
+      if (rightOpen && Math.random() < 0.4) {
+        this.dx += this.randomness;
+      }
+      if (!bottomOpen) {
+        this.dy -= this.caution;
+      }
+      if (!topOpen) {
+        this.dy += this.caution;
+      }
+      if (!leftOpen) {
+        this.dx += this.caution;
+      }
+      if (!rightOpen) {
+        return this.dx -= this.caution;
+      }
+    }
+  };
+
+  module.exports = enemy;
+
+}).call(this);
+
+});
+
 require.define("/entities/sword.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var entity, sword;
 
@@ -681,6 +825,114 @@ require.define("/levels/1.coffee",function(require,module,exports,__dirname,__fi
   lvl1.name = 'duel';
 
   module.exports = lvl1;
+
+}).call(this);
+
+});
+
+require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
+  var dirt, grass, lava, level, thorns, wall;
+
+  level = new Object();
+
+  grass = require('./terrain/grass');
+
+  lava = require('./terrain/lava');
+
+  dirt = require('./terrain/dirt');
+
+  wall = require('./terrain/wall');
+
+  thorns = require('./terrain/thorns');
+
+  level.createTerrain = function() {
+    var i, j, newSquare, row, _i, _j, _ref, _ref1, _results;
+    this.terrain = [];
+    _results = [];
+    for (i = _i = 0, _ref = this.grid.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      row = [];
+      for (j = _j = 0, _ref1 = this.grid[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
+        newSquare = (function() {
+          switch (this.grid[i][j]) {
+            case '1':
+              return object(grass);
+            case '2':
+              return object(dirt);
+            case '3':
+              return object(wall);
+            case '4':
+              return object(thorns);
+            case '5':
+              return object(lava);
+          }
+        }).call(this);
+        newSquare.row = i;
+        newSquare.column = j;
+        row.push(newSquare);
+      }
+      _results.push(this.terrain.push(row));
+    }
+    return _results;
+  };
+
+  level.numRows = function() {
+    return this.grid.length;
+  };
+
+  level.numColumns = function() {
+    return this.grid[0].length;
+  };
+
+  level.draw = function(offset) {
+    var column, row, _i, _ref, _results;
+    if (offset == null) {
+      offset = 0;
+    }
+    _results = [];
+    for (row = _i = 0, _ref = this.numRows(); 0 <= _ref ? _i < _ref : _i > _ref; row = 0 <= _ref ? ++_i : --_i) {
+      _results.push((function() {
+        var _j, _ref1, _results1;
+        _results1 = [];
+        for (column = _j = 0, _ref1 = this.numColumns(); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; column = 0 <= _ref1 ? ++_j : --_j) {
+          _results1.push(this.terrain[row][column].draw(offset));
+        }
+        return _results1;
+      }).call(this));
+    }
+    return _results;
+  };
+
+  level.columnWidth = 50;
+
+  level.rowHeight = 50;
+
+  level.interactWith = function(entity) {
+    var column, row, square, squaresOccupied, _i, _len, _ref, _results;
+    column = floorWithin(entity.x / this.columnWidth, 0, this.numColumns() - 2);
+    row = floorWithin(entity.y / this.rowHeight, 0, this.numRows() - 2);
+    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
+    _results = [];
+    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
+      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
+      square = this.terrain[row][column];
+      entity.knockback({
+        x: column * this.rowHeight,
+        y: row * this.columnWidth
+      }, square.bounciness);
+      _results.push(entity.hp -= square.damage);
+    }
+    return _results;
+  };
+
+  level.squareOpen = function(row, column) {
+    if (row < 0 || column < 0 || row > 11 || column > 15) {
+      return false;
+    } else {
+      return this.terrain[row][column].passable();
+    }
+  };
+
+  module.exports = level;
 
 }).call(this);
 
@@ -1406,258 +1658,6 @@ require.define("/entities/centurion.coffee",function(require,module,exports,__di
 
 });
 
-require.define("/lib/helper.js",function(require,module,exports,__dirname,__filename,process,global){(function(){
-  object = function(o){
-    function F(){}
-    F.prototype = o
-    return new F()
-  }
-
-  log = function(){
-    console.log(arguments)
-  }
-
-  floorWithin = function(num, min, max) {
-  if (min == null) {
-    min = Number.NEGATIVE_INFINITY;
-  }
-  if (max == null) {
-    max = Number.POSITIVEINFINITY;
-  }
-  if (num < min) {
-    num = min;
-  }
-  if (num > max) {
-    num = max;
-  }
-  return Math.floor(num);
-};
-})()
-});
-
-require.define("/entities/enemy.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var enemy;
-
-  enemy = object(require('./player'));
-
-  enemy.type = 'enemy';
-
-  enemy.seeking = 0.3;
-
-  enemy.randomness = 1;
-
-  enemy.caution = 1;
-
-  enemy.lightness = 2;
-
-  enemy.damage = 10;
-
-  enemy.x = 700;
-
-  enemy.y = 275;
-
-  enemy.hp = 50;
-
-  enemy.color = '#980';
-
-  enemy.hit = function(hitter) {
-    this.hurt(hitter);
-    return this.knockback(hitter);
-  };
-
-  enemy.hurt = function(hitter) {
-    return hitter.hp -= this.damage;
-  };
-
-  enemy.randomizePosition = function() {
-    this.x = Math.random() * canvas.width;
-    return this.y = Math.random() * canvas.height;
-  };
-
-  enemy.move = function(level, player) {
-    this.changeDirection(level, player);
-    this.x += this.dx;
-    return this.y += this.dy;
-  };
-
-  enemy.changeDirection = function(level, player) {
-    var bottomOpen, column, leftOpen, rightOpen, row, topOpen, xDistance, yDistance;
-    xDistance = player.x - this.x;
-    yDistance = player.y - this.y;
-    if (player.pulling) {
-      if (xDistance > 0) {
-        this.x += this.lightness;
-      }
-      if (xDistance < 0) {
-        this.x -= this.lightness;
-      }
-      if (yDistance > 0) {
-        this.y += this.lightness;
-      }
-      if (yDistance < 0) {
-        this.y -= this.lightness;
-      }
-    }
-    if (Math.random() > 0.9) {
-      row = floorWithin(this.y / 50, 0, game.level.numRows() - 2);
-      column = floorWithin(this.x / 50, 0, game.level.numColumns() - 2);
-      leftOpen = level.squareOpen(row, column - 1) && level.squareOpen(row + 1, column - 1);
-      rightOpen = level.squareOpen(row, column + 2) && level.squareOpen(row + 1, column + 2);
-      topOpen = level.squareOpen(row - 1, column) && level.squareOpen(row - 1, column + 1);
-      bottomOpen = level.squareOpen(row + 2, column) && level.squareOpen(row + 2, column + 1);
-      if (xDistance > 0 && rightOpen) {
-        this.dx += this.seeking;
-      }
-      if (xDistance < 0 && leftOpen) {
-        this.dx -= this.seeking;
-      }
-      if (yDistance > 0 && bottomOpen) {
-        this.dy += this.seeking;
-      }
-      if (yDistance < 0 && topOpen) {
-        this.dy -= this.seeking;
-      }
-      if (bottomOpen && Math.random() < 0.4) {
-        this.dy += this.randomness;
-      }
-      if (topOpen && Math.random() < 0.4) {
-        this.dy -= this.randomness;
-      }
-      if (leftOpen && Math.random() < 0.4) {
-        this.dx -= this.randomness;
-      }
-      if (rightOpen && Math.random() < 0.4) {
-        this.dx += this.randomness;
-      }
-      if (!bottomOpen) {
-        this.dy -= this.caution;
-      }
-      if (!topOpen) {
-        this.dy += this.caution;
-      }
-      if (!leftOpen) {
-        this.dx += this.caution;
-      }
-      if (!rightOpen) {
-        return this.dx -= this.caution;
-      }
-    }
-  };
-
-  module.exports = enemy;
-
-}).call(this);
-
-});
-
-require.define("/levels/level.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
-  var dirt, grass, lava, level, thorns, wall;
-
-  level = new Object();
-
-  grass = require('./terrain/grass');
-
-  lava = require('./terrain/lava');
-
-  dirt = require('./terrain/dirt');
-
-  wall = require('./terrain/wall');
-
-  thorns = require('./terrain/thorns');
-
-  level.createTerrain = function() {
-    var i, j, newSquare, row, _i, _j, _ref, _ref1, _results;
-    this.terrain = [];
-    _results = [];
-    for (i = _i = 0, _ref = this.grid.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      row = [];
-      for (j = _j = 0, _ref1 = this.grid[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 0 <= _ref1 ? ++_j : --_j) {
-        newSquare = (function() {
-          switch (this.grid[i][j]) {
-            case '1':
-              return object(grass);
-            case '2':
-              return object(dirt);
-            case '3':
-              return object(wall);
-            case '4':
-              return object(thorns);
-            case '5':
-              return object(lava);
-          }
-        }).call(this);
-        newSquare.row = i;
-        newSquare.column = j;
-        row.push(newSquare);
-      }
-      _results.push(this.terrain.push(row));
-    }
-    return _results;
-  };
-
-  level.numRows = function() {
-    return this.grid.length;
-  };
-
-  level.numColumns = function() {
-    return this.grid[0].length;
-  };
-
-  level.draw = function(offset) {
-    var column, row, _i, _ref, _results;
-    if (offset == null) {
-      offset = 0;
-    }
-    _results = [];
-    for (row = _i = 0, _ref = this.numRows(); 0 <= _ref ? _i < _ref : _i > _ref; row = 0 <= _ref ? ++_i : --_i) {
-      _results.push((function() {
-        var _j, _ref1, _results1;
-        _results1 = [];
-        for (column = _j = 0, _ref1 = this.numColumns(); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; column = 0 <= _ref1 ? ++_j : --_j) {
-          _results1.push(this.terrain[row][column].draw(offset));
-        }
-        return _results1;
-      }).call(this));
-    }
-    return _results;
-  };
-
-  level.columnWidth = 50;
-
-  level.rowHeight = 50;
-
-  level.interactWith = function(entity) {
-    var column, row, square, squaresOccupied, _i, _len, _ref, _results;
-    column = floorWithin(entity.x / this.columnWidth, 0, this.numColumns() - 2);
-    row = floorWithin(entity.y / this.rowHeight, 0, this.numRows() - 2);
-    squaresOccupied = [[row, column], [row + 1, column], [row, column + 1], [row + 1, column + 1]];
-    _results = [];
-    for (_i = 0, _len = squaresOccupied.length; _i < _len; _i++) {
-      _ref = squaresOccupied[_i], row = _ref[0], column = _ref[1];
-      square = this.terrain[row][column];
-      entity.knockback({
-        x: column * this.rowHeight,
-        y: row * this.columnWidth
-      }, square.bounciness);
-      _results.push(entity.hp -= square.damage);
-    }
-    return _results;
-  };
-
-  level.squareOpen = function(row, column) {
-    if (row < 0 || column < 0 || row > 11 || column > 15) {
-      return false;
-    } else {
-      return this.terrain[row][column].passable();
-    }
-  };
-
-  module.exports = level;
-
-}).call(this);
-
-});
-
 require.define("/game.coffee",function(require,module,exports,__dirname,__filename,process,global){(function() {
   var game, lvl1, lvl10, lvl11, lvl12, lvl13, lvl14, lvl15, lvl16, lvl2, lvl3, lvl4, lvl5, lvl6, lvl7, lvl8, lvl9;
 
@@ -1792,10 +1792,10 @@ require.define("/game.coffee",function(require,module,exports,__dirname,__filena
   };
 
   game.drawHUD = function() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(10, 10, game.player.hp + 10, 10);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(10, 10, game.player.hp * 2 + 10, 20);
     if (this.latestEnemy) {
-      ctx.fillRect(canvas.width - 150, 10, this.latestEnemy.hp, 10);
+      ctx.fillRect(canvas.width - this.latestEnemy.hp * 2 - 10, 10, this.latestEnemy.hp * 2, 20);
     }
     if (this.enemies.length === 0) {
       this.drawArrow(400);
