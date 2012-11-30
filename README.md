@@ -1,12 +1,10 @@
-##Commands
-browserify entry.js -o bundle.js
-
 This game has it all!
 
 **Clones**
 **Pulling**
 **Imaginary, Invisible Forks**
 
+![screenshot](/public/gitcraftscreenshot.jpg)
 We use
 
 * Node.js
