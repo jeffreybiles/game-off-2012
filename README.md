@@ -1,4 +1,4 @@
-This game has it all!
+This game has it all! (play it [here](http://jeffreybiles.gameoff.jit.su/))
 
 **Clones**
 
